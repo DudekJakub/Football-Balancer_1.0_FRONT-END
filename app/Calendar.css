@@ -1,0 +1,42 @@
+.calendar {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+  border: solid #2f3061;
+  border-radius: 10px;
+  background-color: #588b8b;
+}
+
+.month {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 110%;
+  margin-bottom: 10px;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 35px;
+}
+
+.day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2px;
+  background-color: black;
+  cursor: pointer;
+}
+
+.today {
+  background-color: black;
+}
+
+.selected {
+  background-color: #a10e22;
+  color: #fff;
+}
