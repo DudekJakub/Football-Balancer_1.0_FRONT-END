@@ -6,6 +6,7 @@ import { useImmer } from "use-immer"
 import { Link, useNavigate } from "react-router-dom"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
+import CustomMaterialSymbol from "./CustomMaterialSymbol"
 
 function Room(props) {
   const appState = useContext(StateContext)
@@ -22,20 +23,6 @@ function Room(props) {
     wrongPasswordMessage: ""
   })
 
-  function getSymbol(name, fontColor, cursor, source, dataTip, actionOnClick) {
-    var color = fontColor == 0 || fontColor == "defaultColor" ? "#3336da" : fontColor
-    return (
-      <div className="d-flex ml-3 p-2 align-items-center" data-tip={dataTip} data-for={dataTip}>
-        <span className="material-symbols-outlined mr-2" style={{ fontSize: "25px", color: color, cursor: cursor }} onClick={actionOnClick}>
-          {" "}
-          {name}{" "}
-        </span>{" "}
-        {source}
-        <ReactTooltip id={dataTip} className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
-      </div>
-    )
-  }
-
   function getColorForIsUserInRoomIcon() {
     return state.isUserInRoom ? "darkgreen" : "darkred"
   }
@@ -45,7 +32,7 @@ function Room(props) {
   }
 
   function getDescriptionForIsUserInRoomDataTip() {
-    return state.isUserInRoom ? "YOU'RE THE MEMBER OF THE ROOM : ACCESS GRANTED" : "YOU AREN'T THE MEMBER OF THE ROOM : ACCESS DENIED"
+    return state.isUserInRoom ? "YOU'RE THE MEMBER OF THE ROOM : ACCESS GRANTED" : "YOU AREN'T THE MEMBER OF THE ROOM : ACCESS REQUIRES PASSWORD"
   }
 
   function getColorForIsPublicIcon() {
@@ -167,11 +154,11 @@ function Room(props) {
         </div>
         <div className="ml-auto d-flex">{state.showPasswordInput && !state.isUserInRoom && renderPasswordInput()}</div>
         <div className="ml-auto d-flex">
-          {props.showAccessLevel && getSymbol(getSymbolForIsPublicIcon(), getColorForIsPublicIcon(), "help", null, getDescriptionForIsPublicIcon())}
-          {getSymbol("login", 0, "pointer", null, "ENTER", showPasswordInputActionOrJustEnter)}
-          {props.showPermission && appState.loggedIn && getSymbol(getSymbolForIsUserInRoomIcon(), getColorForIsUserInRoomIcon(), "help", null, getDescriptionForIsUserInRoomDataTip())}
-          {getSymbol("person", 0, "help", state.usersSize, "USERS QUANTITY")}
-          {getSymbol("map", 0, "help", "", state.city)}
+          {props.showAccessLevel && <CustomMaterialSymbol name={getSymbolForIsPublicIcon()} fontColor={getColorForIsPublicIcon()} cursor={"help"} dataTip={getDescriptionForIsPublicIcon()} />}
+          <CustomMaterialSymbol name={"login"} cursor={"pointer"} dataTip={"ENTER"} onClick={showPasswordInputActionOrJustEnter} />
+          {props.showPermission && appState.loggedIn && <CustomMaterialSymbol name={getSymbolForIsUserInRoomIcon()} fontColor={getColorForIsUserInRoomIcon()} cursor={"help"} dataTip={getDescriptionForIsUserInRoomDataTip()} onClick={showPasswordInputActionOrJustEnter} />}
+          <CustomMaterialSymbol name={"person"} cursor={"help"} data={state.usersSize} dataTip={"USERS QUANTITY"} />
+          <CustomMaterialSymbol name={"map"} cursor={"help"} dataTip={state.city} />
         </div>
       </div>
     </div>
