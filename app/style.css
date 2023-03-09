@@ -16,7 +16,7 @@ a:hover {
 /* FONT */
 
 body {
-  font-family: "Roboto", sans-serif;
+  /* font-family: "Roboto", sans-serif; */
 }
 
 /* NAVBAR */
@@ -107,6 +107,13 @@ body {
   padding: 20px;
   border-radius: 15px;
   align-self: auto;
+}
+
+.content-light-blue {
+  background-color: var(--grassGreen);
+  padding: 20px;
+  border-radius: 15px;
+  align-self: center;
 }
 
 @media screen and (max-width: 1000px) {
@@ -231,6 +238,94 @@ footer ul li {
   }
 }
 
+/* ROOM-DESCRIPTION */
+
+.room-description {
+  font-size: 1rem;
+}
+
+.room-description textarea[type="text"] {
+  background-color: var(--light-blue);
+  border-radius: 20px;
+  border: 2px solid black;
+  color: white;
+  padding-left: 10px;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 350px;
+  line-height: 1.5;
+}
+
+.room-description-enter {
+  opacity: 0;
+  transform: translateY(0%);
+}
+
+.room-description-enter-active {
+  opacity: 1;
+  transform: translateX(0%);
+  transition: opacity 1000ms;
+}
+
+.room-description-enter-done {
+  opacity: 1;
+  transition: opacity 20ms;
+}
+
+.room-description-exit {
+  opacity: 1;
+  transition: opacity 1000ms, transform 1000ms;
+}
+
+.room-description-exit-active {
+  opacity: 0;
+  transition: opacity 1000ms, transform 1500ms;
+}
+
+/* MAP */
+
+.room-map {
+  text-align: -webkit-center;
+  color: white;
+}
+
+.add-map {
+  font-size: 1rem;
+}
+
+.add-map-enter {
+  opacity: 0;
+}
+
+.add-map-enter-active {
+  will-change: opacity;
+  opacity: 0;
+}
+
+.add-map-enter-done {
+  opacity: 1;
+  transition-duration: 1s;
+}
+
+.add-map-exit-active {
+  will-change: opacity;
+  transition-duration: 1s;
+  opacity: 0;
+}
+
+.add-map-exit {
+  will-change: opacity;
+  transition-duration: 0.5s;
+  opacity: 0;
+}
+
+.add-map-exit-done {
+  will-change: opacity;
+  transition-duration: 0.5s;
+  opacity: 0;
+}
+
 /* ROOM */
 
 .room-create-contener {
@@ -247,10 +342,20 @@ footer ul li {
 
 .room-content {
   background-color: var(--light-blue);
-  padding: 20px;
+  padding: 30px;
+  border: 2px solid var(--dark-violet);
   border-radius: 15px;
   margin-left: 20px;
   color: white;
+  white-space: pre-line;
+}
+
+.room-edit-date {
+  background-color: var(--grassGreen);
+  text-align: -webkit-center;
+  border-radius: 15px;
+  color: white;
+  margin-right: 0px;
 }
 
 .add-room-text {
@@ -258,6 +363,15 @@ footer ul li {
 }
 
 .add-room-text input[type="text"] {
+  background-color: var(--light-blue);
+  border-radius: 20px;
+  border: 2px solid black;
+  color: white;
+  padding-left: 15px;
+  width: 350px;
+}
+
+.add-room-text input[type="password"] {
   background-color: var(--light-blue);
   border-radius: 20px;
   border: 2px solid black;
@@ -277,15 +391,8 @@ footer ul li {
   padding-bottom: 15px;
   width: 350px;
   line-height: 1.5;
-}
-
-.add-room-text input[type="password"] {
-  background-color: var(--light-blue);
-  border-radius: 20px;
-  border: 2px solid black;
-  color: white;
-  padding-left: 15px;
-  width: 350px;
+  width: 500px;
+  white-space: pre-line;
 }
 
 .add-room-text {
@@ -1145,6 +1252,27 @@ input:focus {
   display: flex;
   flex-direction: row;
 }
+
+.single-room-layout > div {
+  padding: 10px;
+}
+
+.single-room-layout > div:first-child {
+  width: 20%;
+}
+
+.single-room-layout > div:nth-child(2) {
+  flex: 1;
+  width: 60%;
+  height: 335px;
+  display: flex;
+  justify-content: center;
+}
+
+.single-room-layout > div:last-child {
+  width: 20%;
+}
+
 @media screen and (max-width: 1000px) {
   .single-room-layout {
     display: flex;
