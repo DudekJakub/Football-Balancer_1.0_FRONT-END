@@ -126,11 +126,11 @@ function EditRoomBasic(props) {
 
   return (
     <form className="d-flex flex-column" onSubmit={handleSubmit} style={{ fontVariant: "all-small-caps" }}>
-      <div className="main room-create-contener" style={{ color: "white", padding: "0 375px", paddingBottom: "30px", marginLeft: "1rem", marginRight: "1rem" }}>
-        <div className="content mt-4">
+      <div className="main d-flex flex-column container" style={{ color: "white", paddingBottom: "30px", backgroundColor: "" }}>
+        <div className="content-light-blue mt-4">
           <div className="d-flex flex-column">
-            <CreateDefaultInput className={"ml-3 add-room-text"} initialValue={state.name} name={"edit name"} onChange={handleNameChange} autoFocus={true} transitionTrigger={!state.name || state.name.length < 3 || state.name.length > 50} transactionConditionAndMessage={!state.name || state.name.length > 50 ? "Empty name or too long (max. 50 sings)" : "Name too short (min. 3 signs)"} />
-            <CreateDefaultTextArea className={"ml-3 add-room-text"} initialValue={state.description} name={"edit description"} onChange={handleDescriptionChange} transitionTrigger={state.description.length > 500} transactionConditionAndMessage={state.description.length > 500 ? "Description too long (max. 500 sings)" : ""} />
+            <CreateDefaultInput className={"ml-4 mr-4 add-room-text"} initialValue={state.name} name={"edit name"} onChange={handleNameChange} autoFocus={true} transitionTrigger={!state.name || state.name.length < 3 || state.name.length > 50} transactionConditionAndMessage={!state.name || state.name.length > 50 ? "Empty name or too long (max. 50 sings)" : "Name too short (min. 3 signs)"} />
+            <CreateDefaultTextArea className={"ml-4 mr-4 add-room-text"} initialValue={state.description} name={"edit description"} onChange={handleDescriptionChange} transitionTrigger={state.description.length > 500} transactionConditionAndMessage={state.description.length > 500 ? "Description too long (max. 500 sings)" : ""} />
             <CreateDefaultOptionMenu
               name="Access"
               className="ml-3 add-room-text"
@@ -138,7 +138,7 @@ function EditRoomBasic(props) {
               optionElements={() => (
                 <>
                   <option selected disabled>
-                    CURRENT: {state.isPublic ? "PUBLIC" : "PRIVATE"}
+                    CURRENT: {props.room.isPublic ? "PUBLIC" : "PRIVATE"}
                   </option>
                   <option>{"PUBLIC"}</option>
                   <option>{"PRIVATE"}</option>
