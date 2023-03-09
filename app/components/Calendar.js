@@ -43,7 +43,7 @@ function Calendar(props) {
   return (
     <div className="calendar">
       <div className="header">
-        <div>
+        <div className="mt-1" style={{ textAlign: "center" }}>
           <button style={{ border: "none", background: "none", color: "#2f3061" }} onClick={handlePrevMonthClick}>
             {"<"}
           </button>
