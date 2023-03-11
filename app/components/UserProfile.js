@@ -1,15 +1,9 @@
 import React, { useEffect, useState, useContext } from "react"
 import { useParams, NavLink, Routes, Route, useNavigate, Link } from "react-router-dom"
-import UserProfileComments from "./UserProfileComments"
-import UserProfilePosts from "./UserProfilePosts"
 import Axios from "axios"
 import StateContext from "../StateContext"
 import RenderAvatar from "./Avatar"
 import DispatchContext from "../DispatchContext"
-import UserProfileFollowedUsers from "./UserProfileFollowedUsers"
-import UserProfileFollowers from "./UserProfileFollowers"
-import FollowingUserButton from "./FollowingUserButton"
-import { UserProfileFollowedPosts } from "./UserProfileFollowedPosts"
 
 function UserProfile() {
   const navigate = useNavigate()
@@ -101,8 +95,6 @@ function UserProfile() {
               Delete account
             </button>
           )}
-
-          {!isOwner && state.accountStatus === "ACTIVE" && <FollowingUserButton username={username} loggedIn={loggedIn} isFollowed={isFollowed} reload={reload} />}
         </div>
         +
         <div className="d-flex text-center align-items-start">
@@ -134,7 +126,6 @@ function UserProfile() {
                   </button>
                 )}
               </div>
-              {!isOwner && state.accountStatus === "ACTIVE" && <FollowingUserButton username={username} loggedIn={loggedIn} isFollowed={isFollowed} reload={reload} />}
             </div>
           </div>
         </div>
@@ -170,13 +161,7 @@ function UserProfile() {
               </div>
             </div>
 
-            <Routes>
-              <Route path="posts" element={<UserProfilePosts />} />
-              <Route path="comments" element={<UserProfileComments />} />
-              <Route path="followedUsers" element={<UserProfileFollowedUsers />} />
-              <Route path="followers" element={<UserProfileFollowers />} />
-              <Route path="followedPosts" element={<UserProfileFollowedPosts />} />
-            </Routes>
+            <Routes>{/* <Route path="rooms" element={<UserProfileRooms />} /> */}</Routes>
           </div>
         )}
       </div>

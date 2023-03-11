@@ -50,7 +50,7 @@ function Room(props) {
   async function enterTheRoom() {
     try {
       const response = await Axios.post(
-        `/api/room/enter`,
+        `/api/room/basic-management/enter`,
         {
           password: state.providedRoomPassword,
           roomId: state.roomId,
@@ -150,7 +150,7 @@ function Room(props) {
     <div className="single-room container mt-4">
       <div className="single-room-content container d-flex ml-3 p-2 align-items-center">
         <div id="room-name">
-          <Link to={`room/${props.room.id}`}>{props.room.name}</Link>
+          <Link onClick={() => enterTheRoom()}>{props.room.name}</Link>
         </div>
         <div className="ml-auto d-flex">{state.showPasswordInput && !state.isUserInRoom && renderPasswordInput()}</div>
         <div className="ml-auto d-flex">

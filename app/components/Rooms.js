@@ -71,7 +71,7 @@ function Rooms(props) {
   }, [state.sortField])
 
   async function getSortedAndPaginatedRooms() {
-    var url = `/api/room/paginated` + `${state.targetUserIdURL}` + `?pageSize=${state.paginationValue}&sortField=${state.sortField}&sortDirection=${state.sortDirection}&fetchPublic=${state.fetchPublic}`
+    var url = `/api/room/basic-management/paginated` + `${state.targetUserIdURL}` + `?pageSize=${state.paginationValue}&sortField=${state.sortField}&sortDirection=${state.sortDirection}&fetchPublic=${state.fetchPublic}`
     url = props.forUser !== undefined ? url.concat(`?userId=${appState.user.id}`) : url
     const response = await Axios.get(url)
     setState(draft => {
@@ -82,10 +82,10 @@ function Rooms(props) {
 
   async function fetchingRoomsOnMount() {
     const userId = appState.loggedIn ? appState.user.id : 0
-    var url = `/api/room/paginated?userId=${userId}`
+    var url = `/api/room/basic-management/paginated?userId=${userId}`
 
     if (props.forUser !== undefined) {
-      url = `/api/room/paginated${state.targetUserIdURL}`
+      url = `/api/room/basic-management/paginated${state.targetUserIdURL}`
     }
 
     const resposne = await Axios.get(url)

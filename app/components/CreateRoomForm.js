@@ -47,7 +47,7 @@ function CreateRoom() {
     async function fetchData() {
       try {
         const response = await Axios.post(
-          "/api/room",
+          "/api/room/basic-management",
           {
             userRequestSenderId: appState.user.id,
             roomName,

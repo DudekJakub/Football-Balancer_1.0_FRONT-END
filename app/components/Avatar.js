@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react"
-import Button from "@material-ui/core/Button"
 import ClickAwayListener from "@material-ui/core/ClickAwayListener"
 import Grow from "@material-ui/core/Grow"
 import Paper from "@material-ui/core/Paper"
@@ -9,7 +8,6 @@ import MenuList from "@material-ui/core/MenuList"
 import CameraAltIcon from "@material-ui/icons/CameraAlt"
 import { makeStyles } from "@material-ui/core/styles"
 import { IconButton } from "@material-ui/core"
-import RenderCropper from "./Cropper"
 import Axios from "axios"
 import StateContext from "../StateContext"
 

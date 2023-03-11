@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react"
+import React, { useEffect, useState, useContext, useRef } from "react"
 import { Link, useLocation } from "react-router-dom"
 import ReactTooltip from "react-tooltip"
 import Axios from "axios"
@@ -213,6 +213,23 @@ function ViewSingleRoom(props) {
       draft.renderEditDates = false
     })
   }
+
+  const [messages, setMessages] = useState([])
+  const eventSourceRef = useRef(null)
+
+  useEffect(() => {
+    const eventSource = new EventSource("http://localhost:8085/api/notification/messages/stream")
+    eventSource.onmessage = event => {
+      const message = JSON.parse(event.data)
+      setMessages(messages => [...messages, message])
+      console.log(message)
+    }
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+      }
+    }
+  }, [])
 
   if (!navigated) return <NotFound />
   if (state.isLoading) return <Loading />

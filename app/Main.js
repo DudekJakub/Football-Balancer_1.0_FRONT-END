@@ -13,14 +13,10 @@ import Login from "./components/Login"
 import Search from "./components/Search"
 import RegisterForm from "./components/RegisterForm"
 import CreateRoomForm from "./components/CreateRoomForm"
-import CreateTopicForm from "./components/CreateTopicForm"
 import UserProfile from "./components/UserProfile"
 import ChangeBIO from "./components/ChangeBIO"
-import EditPost from "./components/EditPost"
-import EditTopic from "./components/EditTopic"
 import ViewSingleRoom from "./components/ViewSingleRoom"
 import FlashMessages from "./components/FlashMessages"
-import ViewSingleTopic from "./components/ViewSingleTopic"
 import NotFound from "./components/NotFound"
 import Logout from "./components/Logout"
 import Chat from "./components/chat/Chat"
@@ -128,12 +124,8 @@ function Main() {
             <Route path="/logout" element={<Logout />} />
             <Route path="/user/create" element={<RegisterForm />} />
             <Route path="/room/create" element={<CreateRoomForm />} />
-            <Route path="/topic/create" element={<CreateTopicForm />} />
             <Route path="/profile/changebio/:username" element={<ChangeBIO />} />
-            <Route path="/post/edit/:id" element={<EditPost />} />
-            <Route path="/topic/edit/:id" element={<EditTopic />} />
             <Route path="/room/:id" element={<ViewSingleRoom />} />
-            <Route path="/topic/:id" element={<ViewSingleTopic />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/chat" element={<Chat />} />
           </Routes>

@@ -115,7 +115,7 @@ function EditRoomDates(props) {
       async function submitDatesChange() {
         try {
           await Axios.patch(
-            `/api/room/next-match-all-dates/${props.roomId}?adminId=${appState.user.id}`,
+            `/api/room/basic-management/next-match-all-dates/${props.roomId}?adminId=${appState.user.id}`,
             {
               nextMatchDate: roomDates.nextMatchDateFormated,
               nextMatchRegistrationStartDate: roomDates.nextMatchRegistrationOpenDateFormated,
@@ -148,6 +148,13 @@ function EditRoomDates(props) {
     if (nextMatchRegistrationEndDateFormated < roomDates.nextMatchRegistrationOpenDateFormated) {
       setError(draft => {
         draft.registrationEndDateMessage = "Registration end date cannot be before the registration open date!"
+        draft.withRegistrationEndDate = true
+      })
+      return
+    }
+    if (nextMatchRegistrationEndDateFormated > roomDates.nextMatchDateFormated) {
+      setError(draft => {
+        draft.registrationEndDateMessage = "Registration end date cannot be after the next match date!"
         draft.withRegistrationEndDate = true
       })
       return

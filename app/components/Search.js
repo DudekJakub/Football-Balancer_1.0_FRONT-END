@@ -27,12 +27,10 @@ function Search() {
             draft.loading = false
           })
           const searchItem = state.searchItem
-          const responseRoom = await Axios.get("/api/room/search", { params: { searchItem } }, { cancelToken: ourRequest.token })
-          // const responseTopic = await Axios.get("/api/topic/search", { params: { searchItem } }, { cancelToken: ourRequest.token })
+          const responseRoom = await Axios.get("/api/room/basic-management/search", { params: { searchItem } }, { cancelToken: ourRequest.token })
           console.log(responseRoom.data)
           setState(draft => {
             draft.resultsRooms = responseRoom.data
-            // draft.resultsTopics = responseTopic.data
           })
         } catch (e) {
           console.log("There was a problem search")

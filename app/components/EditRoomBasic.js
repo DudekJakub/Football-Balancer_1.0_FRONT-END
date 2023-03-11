@@ -95,7 +95,7 @@ function EditRoomBasic(props) {
     async function updateRoom() {
       try {
         await Axios.put(
-          `/api/room/${props.room.id}`,
+          `/api/room/basic-management/${props.room.id}`,
           {
             userRequestSenderId: appState.user.id,
             name: state.name,
