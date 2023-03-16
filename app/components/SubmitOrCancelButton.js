@@ -1,6 +1,4 @@
 import React, { useEffect, useContext } from "react"
-import { useState } from "react"
-import StateContext from "../StateContext"
 import { CSSTransition } from "react-transition-group"
 
 function SubmitOrCancelButton(props) {

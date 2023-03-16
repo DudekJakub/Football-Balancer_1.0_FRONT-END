@@ -65,7 +65,7 @@ function CreateRoom() {
         })
         handleNavigate(response)
       } catch (e) {
-        console.log("There was a problem creating room")
+        console.log("There was a problem creating room" + e)
         return
       }
     }

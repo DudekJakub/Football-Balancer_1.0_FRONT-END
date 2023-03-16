@@ -194,7 +194,7 @@ function RegisterForm() {
               <div className="p-2 form-group">
                 <span className="ml-3">Password</span>
                 <br />
-                <input onChange={e => dispatch({ type: "passwordReceived", value: e.target.value })} type="password" className="ml-3" placeholder="**** (min. 2/1 digits/symbol)" />
+                <input onChange={e => dispatch({ type: "passwordReceived", value: e.target.value })} type="password" className="ml-3" placeholder="**** (2/1 digits/symbol)" />
                 <CSSTransition in={state.password.hasErrors} timeout={330} classNames="liveValidateMessage" unmountOnExit>
                   <div className="alert alert-danger small liveValidateMessage ml-3">{state.password.message}</div>
                 </CSSTransition>

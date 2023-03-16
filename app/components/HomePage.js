@@ -1,18 +1,12 @@
-import React, { useEffect, useContext } from "react";
-import { useImmer } from "use-immer";
-import { useNavigate } from "react-router-dom";
-import Axios from "axios";
-import Loading from "./Loading";
-import StateContext from "../StateContext";
-import DispatchContext from "../DispatchContext";
-import ReactTooltip from "react-tooltip";
-import { Pagination } from "@mui/material";
-import Rooms from "./Rooms";
+import React, { useEffect, useContext } from "react"
+import { useImmer } from "use-immer"
+import Loading from "./Loading"
+import StateContext from "../StateContext"
+import RoomsPublic from "./RoomsPublic"
+import RoomsUser from "./RoomsUser"
 
 function HomePage(props) {
-  const appState = useContext(StateContext);
-  const appDispatch = useContext(DispatchContext);
-  const navigate = useNavigate();
+  const appState = useContext(StateContext)
   const [state, setState] = useImmer({
     feed: [],
     isLoading: false,
@@ -22,38 +16,21 @@ function HomePage(props) {
     numberOfRecords: 1,
     sortField: "",
     sortDirection: "ASC",
-    isMounted: false,
-  });
+    isMounted: false
+  })
 
-  if (state.isLoading) return <Loading />;
+  if (state.isLoading) return <Loading />
   return (
     <div className="main container d-flex flex-column align-items-center">
       <div>
-        <h3
-          className="font-weight-bold text-center"
-          style={{ fontVariant: "all-petite-caps" }}
-        >
+        <h3 className="font-weight-bold text-center" style={{ fontVariant: "all-petite-caps" }}>
           WELCOME!
         </h3>
       </div>
-      <Rooms title="PUBLIC ROOMS" fetchPublic={() => true} />
-      {appState.loggedIn && (
-        <Rooms title="USER'S ROOMS" forUser={appState.user.id} />
-      )}
+      <RoomsPublic title="PUBLIC ROOMS" />
+      {appState.loggedIn && <RoomsUser title="USER'S ROOMS" />}
     </div>
-  );
-  return (
-    <div className="main container d-flex flex-column align-items-center">
-      <div>
-        <h3
-          className="font-weight-bold text-center"
-          style={{ fontVariant: "all-petite-caps" }}
-        >
-          WELCOME!
-        </h3>
-      </div>
-    </div>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage

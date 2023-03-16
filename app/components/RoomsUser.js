@@ -7,10 +7,9 @@ import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 import ReactTooltip from "react-tooltip"
 import { Pagination } from "@mui/material"
-import { CSSTransition, TransitionGroup } from "react-transition-group"
 import Room from "./Room"
 
-function Rooms(props) {
+function RoomsUser(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
   const navigate = useNavigate()
@@ -23,22 +22,15 @@ function Rooms(props) {
     numberOfRecords: 1,
     sortField: "",
     sortDirection: "ASC",
-    isReadyToMount: false,
+    isReadyToMount: true,
     isMounted: false,
     isPublic: "",
     subpageTitle: props.title,
-    fetchPublic: "",
-    targetUserId: "",
-    targetUserIdURL: "",
+    fetchPublic: true,
+    targetUserId: appState.user.id,
+    targetUserIdURL: `/${appState.user.id}`,
     hideOwnRooms: false
   })
-
-  useEffect(() => {
-    setState(draft => {
-      ;(draft.targetUserIdURL = props.forUser !== undefined ? `/${props.forUser}` : ``), (draft.targetUserId = props.forUser !== undefined ? props.forUser : undefined)
-      ;(draft.fetchPublic = props.fetchPublic !== undefined ? props.fetchPublic : true), (draft.isReadyToMount = true)
-    })
-  }, [])
 
   useEffect(() => {
     function fetchData() {
@@ -72,8 +64,7 @@ function Rooms(props) {
 
   async function getSortedAndPaginatedRooms() {
     var url = `/api/room/basic-management/paginated` + `${state.targetUserIdURL}` + `?pageSize=${state.paginationValue}&sortField=${state.sortField}&sortDirection=${state.sortDirection}&fetchPublic=${state.fetchPublic}`
-    url = props.forUser !== undefined ? url.concat(`?userId=${appState.user.id}`) : url
-    const response = await Axios.get(url)
+    const response = await Axios.get(url.concat(`?userId=${appState.user.id}`))
     setState(draft => {
       draft.feed = response.data
       draft.isLoading = false
@@ -81,12 +72,7 @@ function Rooms(props) {
   }
 
   async function fetchingRoomsOnMount() {
-    const userId = appState.loggedIn ? appState.user.id : 0
-    var url = `/api/room/basic-management/paginated?userId=${userId}`
-
-    if (props.forUser !== undefined) {
-      url = `/api/room/basic-management/paginated${state.targetUserIdURL}`
-    }
+    var url = `/api/room/basic-management/paginated${state.targetUserIdURL}`
 
     const resposne = await Axios.get(url)
     setState(draft => {
@@ -115,10 +101,8 @@ function Rooms(props) {
   }
 
   function renderRooms() {
-    const showAccessLevel = props.forUser !== undefined ? true : false
-    const showPermission = props.forUser === undefined ? true : false
     return state.feed.map(room => {
-      return <Room room={room} key={room.id} showAccessLevel={showAccessLevel} showPermission={showPermission} />
+      return <Room room={room} key={room.id} showAccessLevel={true} showPermission={false} />
     })
   }
 
@@ -144,15 +128,6 @@ function Rooms(props) {
               </button>
             </div>
           ) : null}
-          {props.forUser === undefined && (
-            <>
-              <span className="material-symbols-outlined mr-3" style={{ cursor: "help" }} data-tip="In order to improve transparency, the public list of rooms does not contain rooms to which the user belongs." data-for="info">
-                {" "}
-                info{" "}
-              </span>
-              <ReactTooltip id="info" className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
-            </>
-          )}
           <select
             className="mr-3"
             name="Pagination"
@@ -212,4 +187,4 @@ function Rooms(props) {
   )
 }
 
-export default Rooms
+export default RoomsUser

@@ -124,15 +124,15 @@ function EditRoomDates(props) {
             { headers: { Authorization: `Bearer ${appState.user.token}` } },
             { cancelToken: ourRequest.token }
           )
-          appDispatch({
-            type: "flashMessage",
-            value: "Next match dates updated successfuly !",
-            messageType: "message-green"
-          })
         } catch (e) {
           console.log("There was a problem updating next match dates " + e)
           return
         }
+        appDispatch({
+          type: "flashMessage",
+          value: "Next match dates updated successfuly !",
+          messageType: "message-green"
+        })
       }
       submitDatesChange()
       props.onSubmit(roomDates)
