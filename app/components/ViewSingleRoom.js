@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useContext, useRef } from "react"
+import React, { useEffect, useState, useContext } from "react"
 import { Link, useLocation } from "react-router-dom"
 import ReactTooltip from "react-tooltip"
-import Axios from "axios"
 import { useImmer } from "use-immer"
 import { CSSTransition } from "react-transition-group"
 import StateContext from "../StateContext"
@@ -9,11 +8,12 @@ import DispatchContext from "../DispatchContext"
 import Loading from "./Loading"
 import NotFound from "./NotFound"
 import RenderAvatar from "./Avatar"
-import DeleteModal from "./DeleteModal"
 import EditRoomBasic from "./EditRoomBasic"
 import CustomMaterialSymbol from "./CustomMaterialSymbol"
 import EditRoomDates from "./EditRoomDates"
 import Map from "./Map"
+import axios from "axios"
+import RoomAdminNotificationBox from "./notifications/RoomAdminNotificationBox"
 
 function ViewSingleRoom(props) {
   const location = useLocation()
@@ -56,6 +56,7 @@ function ViewSingleRoom(props) {
     }
   })
   const [state, setState] = useImmer({
+    renderNotificationBox: false,
     renderEditDates: false,
     renderMap: false,
     renderDescription: true,
@@ -214,37 +215,50 @@ function ViewSingleRoom(props) {
     })
   }
 
-  const [messages, setMessages] = useState([])
-  const eventSourceRef = useRef(null)
-
-  useEffect(() => {
-    const eventSource = new EventSource("http://localhost:8085/api/notification/messages/stream")
-    eventSource.onmessage = event => {
-      const message = JSON.parse(event.data)
-      setMessages(messages => [...messages, message])
-      console.log(message)
-    }
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
+  async function handleAddUserRequest() {
+    if (!room.isUserMember) {
+      try {
+        axios.post(`/api/room/request/new-member-request?roomId=${room.id}&requesterId=${appState.user.id}`, {}, { headers: { Authorization: `Bearer ${appState.user.token}` } })
+      } catch (e) {
+        console.log("There was a problem sending the request" + e)
+        return
       }
+      appDispatch({
+        type: "flashMessage",
+        value: "Request successfully sent !",
+        messageType: "message-green"
+      })
     }
-  }, [])
+  }
 
   if (!navigated) return <NotFound />
   if (state.isLoading) return <Loading />
   return (
     <div>
-      test
       <div className="main d-flex flex-column container">
         <div className="mt-5"></div>
         <Link className="text-primary medium font-weight-bold" to={`/`}>
           &laquo; Back HOME
         </Link>
+        <div className="notifications-box-container">
+          <button
+            className="notification-button"
+            onClick={() =>
+              setState(draft => {
+                draft.renderNotificationBox = !draft.renderNotificationBox
+              })
+            }
+          >
+            NOTIFICATIONS | CHAT
+          </button>
+        </div>
+        <CSSTransition in={state.renderNotificationBox} timeout={400} classNames="add-room-text" unmountOnExit>
+          {room.isUserAdmin && <RoomAdminNotificationBox roomId={room.id} />}
+        </CSSTransition>
         <div className="mobile-toggle">
           <h2 className="d-flex ml-auto mobile-toggle">
-            <div className="d-flex  p-2 align-items-center" data-tip={room.isUserMember ? "YOU'RE MEMBER" : "YOU AREN'T MEMBER YET. SEND REQUEST NOW!"} data-for={"acccess"}>
-              <span className="material-symbols-outlined " style={{ fontSize: "25px", color: room.isUserMember ? "darkgreen" : "darkred", cursor: "pointer" }}>
+            <div className="d-flex p-2 align-items-center" data-tip={room.isUserMember ? "YOU'RE MEMBER" : "YOU AREN'T MEMBER YET. SEND REQUEST NOW!"} data-for={"acccess"}>
+              <span className="material-symbols-outlined" style={{ fontSize: "25px", color: room.isUserMember ? "darkgreen" : "darkred", cursor: "pointer" }} onClick={handleAddUserRequest}>
                 {room.isUserMember ? "person" : "person_add"}
               </span>
               <ReactTooltip id={"acccess"} className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />

@@ -1,0 +1,70 @@
+.notifications-box-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
+
+.notifications-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 10px;
+  justify-content: space-evenly;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 3px;
+  background-color: #588b8b;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.7;
+  border-radius: 10px;
+}
+
+.admin-tab {
+  background-color: #2f3061;
+  color: white;
+}
+
+.room-tab {
+  background-color: #4c9141;
+  color: white;
+}
+
+.chat-tab {
+  border-radius: 10px;
+  background-color: #5180e6;
+  color: white;
+}
+
+.active {
+  opacity: 1;
+  background-color: #faad14;
+  color: black;
+}
+
+.notifications {
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 10px;
+  height: 300px;
+  background-color: #4c9141;
+}
+
+.notification-button {
+  font-variant: all-small-caps;
+  background-color: rgb(47, 48, 97);
+  align-self: center;
+  padding: 5px;
+  color: wheat;
+  border: 1px solid black;
+  border-radius: 10px;
+}
