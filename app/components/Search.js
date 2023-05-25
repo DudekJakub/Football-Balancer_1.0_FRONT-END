@@ -27,13 +27,13 @@ function Search() {
             draft.loading = false
           })
           const searchItem = state.searchItem
-          const responseRoom = await Axios.get("/api/room/basic-management/search", { params: { searchItem } }, { cancelToken: ourRequest.token })
-          console.log(responseRoom.data)
+          const userId = appState.loggedIn ? appState.user.id : 0
+          const responseRoom = await Axios.get(`/api/room/basic-management/search?searchItem=${searchItem}&userId=${userId}`, { cancelToken: ourRequest.token })
           setState(draft => {
             draft.resultsRooms = responseRoom.data
           })
         } catch (e) {
-          console.log("There was a problem search")
+          console.log("There was a problem with searching")
         }
       }
       fetchResults()
