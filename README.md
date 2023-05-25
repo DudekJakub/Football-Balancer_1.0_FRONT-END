@@ -1,8 +1,24 @@
-# TO RUN :
+# Welcome to Football Balancer application!
+
+## Description:
+This is front-end layer of the Football-Balancer project!
+<br/>
+It is written in ReactJS (java-script library) and it provides access to Football-Balancer application from the browser. 
+<br/>
+<br/>
+Please jump to following link to main service's readme file where you can find general information about the project. From this place you will be able to read about project itself, how to run it, what basic functional requirements it has, what technology stacks I decided to include and a bit more.
+<br/>
+<br/>
+`Link:`
+https://github.com/DudekJakub/Football-Balancer_1.0_MONOLITH#readme
+
+<br/>
+
+### TO RUN :
 TERMINAL : npm run dev
 WEBSTORM PLAY BUTTON : edit configuration -> + npm -> Command : run script : dev
 
-# Getting Started with Create React App
+### Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
