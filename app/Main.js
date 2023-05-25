@@ -7,6 +7,7 @@ import DispatchContext from "./DispatchContext"
 import StateContext from "./StateContext"
 import { CSSTransition } from "react-transition-group"
 import Axios from "axios"
+import { RoomProvider } from "./components/RoomContext"
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import Login from "./components/Login"
@@ -21,7 +22,6 @@ import NotFound from "./components/NotFound"
 import Logout from "./components/Logout"
 import Chat from "./components/chat/Chat"
 import HomePage from "./components/HomePage"
-import { Room } from "@material-ui/icons"
 
 Axios.defaults.baseURL = "http://localhost:8083"
 
@@ -106,34 +106,35 @@ function Main() {
   }, [state.loggedIn])
 
   return (
-    <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>
-        <BrowserRouter>
-          <FlashMessages messages={state.flashMessages} />
-          <Navbar />
-          <CSSTransition timeout={330} in={state.searchIsOpen} classNames="search-overlay" unmountOnExit>
-            <div className="search-overlay">
-              <Search />
-            </div>
-          </CSSTransition>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/test" element={<Room />} />
-            <Route path="/profile/:username/*" element={<UserProfile />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/logout" element={<Logout />} />
-            <Route path="/user/create" element={<RegisterForm />} />
-            <Route path="/room/create" element={<CreateRoomForm />} />
-            <Route path="/profile/changebio/:username" element={<ChangeBIO />} />
-            <Route path="/room/:id" element={<ViewSingleRoom />} />
-            <Route path="*" element={<NotFound />} />
-            <Route path="/chat" element={<Chat />} />
-          </Routes>
-          {state.loggedIn ? <Logout /> : null}
-          <Footer />
-        </BrowserRouter>
-      </DispatchContext.Provider>
-    </StateContext.Provider>
+    <RoomProvider>
+      <StateContext.Provider value={state}>
+        <DispatchContext.Provider value={dispatch}>
+          <BrowserRouter>
+            <FlashMessages messages={state.flashMessages} />
+            <Navbar />
+            <CSSTransition timeout={330} in={state.searchIsOpen} classNames="search-overlay" unmountOnExit>
+              <div className="search-overlay">
+                <Search />
+              </div>
+            </CSSTransition>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/profile/:username/*" element={<UserProfile />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/logout" element={<Logout />} />
+              <Route path="/user/create" element={<RegisterForm />} />
+              <Route path="/room/create" element={<CreateRoomForm />} />
+              <Route path="/profile/changebio/:username" element={<ChangeBIO />} />
+              <Route path="/room/:id" element={<ViewSingleRoom />} />
+              <Route path="*" element={<NotFound />} />
+              <Route path="/chat" element={<Chat />} />
+            </Routes>
+            {state.loggedIn ? <Logout /> : null}
+            <Footer />
+          </BrowserRouter>
+        </DispatchContext.Provider>
+      </StateContext.Provider>
+    </RoomProvider>
   )
 }
 
