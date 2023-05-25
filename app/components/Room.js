@@ -1,5 +1,4 @@
 import React, { useContext } from "react"
-import ReactTooltip from "react-tooltip"
 import { CSSTransition } from "react-transition-group"
 import Axios from "axios"
 import { useImmer } from "use-immer"
@@ -7,10 +6,12 @@ import { Link, useNavigate } from "react-router-dom"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 import CustomMaterialSymbol from "./CustomMaterialSymbol"
+import { RoomContext } from "./RoomContext"
 
 function Room(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
+  const { room2, setRoom } = useContext(RoomContext)
   const navigate = useNavigate()
   const [state, setState] = useImmer({
     roomId: props.room.id,
@@ -65,7 +66,10 @@ function Room(props) {
           value: "Joined the room!",
           messageType: "message-green"
         })
+
         navigate(`/room/${state.roomId}`, { state: { responseData: response.data, navigated: true } })
+
+        // setRoom(response.data)
       }
     } catch (e) {
       console.log("There was a problem or the request was cancelled." + e)
@@ -95,6 +99,7 @@ function Room(props) {
       return
     }
     enterTheRoom()
+    appDispatch({ type: "closeSearch" })
   }
 
   function renderPasswordInput() {
@@ -102,6 +107,7 @@ function Room(props) {
       <div className="ml-auto d-flex">
         {renderWrongPasswordMessage()}
         <input
+          autoFocus
           type="password"
           className="room-password-input placeholder-color"
           style={{ textAlign: "center" }}
@@ -120,7 +126,14 @@ function Room(props) {
 
   function renderPasswordSubmitButton() {
     return (
-      <button className="btn-secondary ml-2 pr-2 pl-2" onClick={() => enterTheRoom()}>
+      <button
+        className="btn-secondary ml-2 pr-2 pl-2"
+        type="submit"
+        onClick={() => {
+          enterTheRoom()
+          appDispatch({ type: "closeSearch" })
+        }}
+      >
         JOIN
       </button>
     )
