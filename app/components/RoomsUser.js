@@ -121,9 +121,9 @@ function RoomsUser(props) {
           {state.targetUserId > 0 ? (
             <div className="mobile-toggle">
               <button className="single-room-content p-1 mr-3" style={{ backgroundColor: "DarkBlue" }} onClick={() => navigate(`/room/create`)}>
-                <text data-tip="Create new room!" data-for="add-new-room">
+                <a data-tip="Create new room!" data-for="add-new-room">
                   Create ROOM
-                </text>
+                </a>
                 <ReactTooltip id="add-new-room" className="custom-tooltip" />
               </button>
             </div>

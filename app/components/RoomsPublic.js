@@ -122,6 +122,7 @@ function RoomsPublic(props) {
             <ReactTooltip id="info" className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
           </>
           <select
+            value="10"
             className="mr-3"
             name="Pagination"
             id="pagination"
@@ -129,7 +130,7 @@ function RoomsPublic(props) {
               paginate(e.target.value)
             }}
           >
-            <option value="10" disabled selected>
+            <option value="10" disabled>
               Pagination
             </option>
             <option value="10">10</option>
@@ -138,6 +139,7 @@ function RoomsPublic(props) {
             <option value="40">40</option>
           </select>
           <select
+            value="id.asc"
             className="mr-3"
             name="Sorting"
             id="sorting"
@@ -145,7 +147,7 @@ function RoomsPublic(props) {
               sort(e.target.value)
             }}
           >
-            <option value="id.asc" disabled selected>
+            <option value="id.asc" disabled>
               Sorting
             </option>
             <option value="name.asc">Alphabetically</option>

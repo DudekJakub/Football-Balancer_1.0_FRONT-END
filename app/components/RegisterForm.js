@@ -52,7 +52,6 @@ function RegisterForm() {
       case "usernameReceived":
         draft.username.hasErrors = false
         draft.username.value = action.value
-
         return
       case "usernameValidation":
         if (draft.username.value.length < 4) {
@@ -152,7 +151,12 @@ function RegisterForm() {
           appDispatch({ type: "flashMessage", value: "Account succesfully created !", messageType: "message-green" })
           navigate("/login")
         } catch (e) {
-          console.log("There was a problem creating an account" + e.message)
+          if (e.response.status === 409) {
+            console.log("Account with given username already exists" + e.message)
+            appDispatch({ type: "flashMessage", value: "Account with given username already exists !", messageType: "message-orange" })
+          } else {
+            console.log("There was a problem creating an account" + e.message)
+          }
         }
       }
       register()
@@ -182,6 +186,7 @@ function RegisterForm() {
             <div className="mt-4">
               <h6 className="input-text text-center">Sign into Football Equalizer</h6>
             </div>
+            <div></div>
             <div className="form-label mt-4 d-flex flex-column justify-content-center">
               <div className="p-2 form-group">
                 <span className="ml-3">Username</span>

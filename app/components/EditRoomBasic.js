@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
 import { CSSTransition } from "react-transition-group"
-import { useImmer } from "use-immer"
 import Axios from "axios"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 import CreateDefaultInput from "./CreateDefaultInput"
 import CreateDefaultTextArea from "./CreateDefaultTextArea"
 import CreateDefaultOptionMenu from "./CreateDefaultOptionMenu"
+import { RoomContext } from "./RoomContext"
 
 function EditRoomBasic(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
+  const { room2, setRoom } = useContext(RoomContext)
   const [state, setState] = useState({
     name: props.room.name,
     description: props.room.description,
@@ -94,10 +94,10 @@ function EditRoomBasic(props) {
     const ourRequest = Axios.CancelToken.source()
     async function updateRoom() {
       try {
-        await Axios.put(
+        const response = await Axios.put(
           `/api/room/basic-management/${props.room.id}`,
           {
-            userRequestSenderId: appState.user.id,
+            roomAdminId: appState.user.id,
             name: state.name,
             description: state.description,
             public: state.isPublic,
@@ -106,18 +106,28 @@ function EditRoomBasic(props) {
           { headers: { Authorization: `Bearer ${appState.user.token}` } },
           { cancelToken: ourRequest.token }
         )
-        appDispatch({
-          type: "flashMessage",
-          value: "Room successfully updated !",
-          messageType: "message-green"
-        })
+        if (response.data) {
+          props.onSubmit({ name: response.data.name, description: response.data.description, isPublic: response.data.public, location: response.data.location })
+
+          // setRoom(prevRoom => ({
+          //   ...prevRoom,
+          //   name: response.data.name,
+          //   description: response.data.description,
+          //   public: response.data.public
+          // }))
+
+          appDispatch({
+            type: "flashMessage",
+            value: "Room successfully updated !",
+            messageType: "message-green"
+          })
+        }
       } catch (e) {
         console.log("There was a problem updating room" + e)
         return
       }
     }
     updateRoom()
-    props.onSubmit({ name: state.name, description: state.description, isPublic: state.isPublic, location: location })
 
     return () => {
       ourRequest.cancel()
