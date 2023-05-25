@@ -35,9 +35,11 @@ body {
 }
 
 .password-overlay form {
+  font-variant: all-small-caps;
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
+  text-align: center;
 }
 
 .password-overlay label {
@@ -54,16 +56,39 @@ body {
 }
 
 .password-overlay button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  font-variant: all-small-caps;
+  background-color: rgb(47, 48, 97);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  color: wheat;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.password-overlay button.home {
+  font-variant: all-small-caps;
+  background-color: rgb(148, 88, 31);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  color: wheat;
+  border: 1px solid black;
+  border-radius: 10px;
 }
 
 .password-overlay button:hover {
   background-color: #0056b3;
+}
+
+.password-overlay div.info-box {
+  color: rgb(241 218 174);
+  background: var(--light-blue);
+  border: 1px solid;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 11px;
 }
 
 /* NAVBAR */
@@ -175,6 +200,7 @@ body {
 }
 
 /* ROOMS */
+
 .horizontal-label {
   display: inline-block;
   margin-right: 10px;
@@ -578,6 +604,7 @@ footer ul li {
     margin-left: 0px;
   }
 }
+
 /* PROFILE */
 
 .profile-avatar .material-symbols-outlined {
@@ -600,6 +627,7 @@ footer ul li {
   background-color: #f5f5f5;
   overflow: hidden;
 }
+
 /* PROFILE TABS */
 
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700");
@@ -1389,6 +1417,7 @@ input:focus {
 }
 
 /* CHAT */
+
 .content {
   background-color: var(--grassGreen);
   padding: 20px;
@@ -1431,18 +1460,6 @@ input:focus {
   border-left-style: hidden;
   border-bottom: 1px solid black;
 }
-
-/*.chat-input {*/
-/*  height: 40px;*/
-/*  background-color: var(--light-blue);*/
-/*  color: black;*/
-/*  border-radius: 10px;*/
-/*  border: 2px solid black;*/
-/*}*/
-
-/*.chat-field {*/
-/*  background-color: var(--light-blue);*/
-/*}*/
 
 .no-outline:focus {
   outline: none;
@@ -1709,6 +1726,7 @@ input:focus {
 }
 
 /* NOTIFICATIONS */
+
 .item-not-read {
   background-color: var(--grassGreen);
   display: grid;
