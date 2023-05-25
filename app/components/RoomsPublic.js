@@ -60,7 +60,7 @@ function RoomsPublic(props) {
   }, [state.sortField])
 
   async function getSortedAndPaginatedRooms() {
-    var url = `/api/room/basic-management/paginated?userId=${userId}&pageSize=${state.paginationValue}&sortField=${state.sortField}&sortDirection=${state.sortDirection}&fetchPublic=${state.fetchPublic}`
+    var url = `/api/room/basic-management/paginated?userId=${state.targetUserId}&pageSize=${state.paginationValue}&sortField=${state.sortField}&sortDirection=${state.sortDirection}&fetchPublic=${state.fetchPublic}`
     const response = await Axios.get(url)
     setState(draft => {
       draft.feed = response.data
