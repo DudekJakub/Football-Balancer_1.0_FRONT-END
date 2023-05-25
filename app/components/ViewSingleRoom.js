@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import ReactTooltip from "react-tooltip"
 import { useImmer } from "use-immer"
 import { CSSTransition } from "react-transition-group"
+import { RoomContext } from "./RoomContext"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 import Loading from "./Loading"
@@ -10,16 +11,19 @@ import NotFound from "./NotFound"
 import RenderAvatar from "./Avatar"
 import EditRoomBasic from "./EditRoomBasic"
 import CustomMaterialSymbol from "./CustomMaterialSymbol"
+import moment from "moment/moment"
 import EditRoomDates from "./EditRoomDates"
 import Map from "./Map"
-import axios from "axios"
+import Axios from "axios"
+import RoomManagement from "./roomManagement/RoomManagement"
 import RoomAdminNotificationBox from "./notifications/RoomAdminNotificationBox"
+import RoomUserNotificationBox from "./notifications/RoomUserNotificationBox"
 
-function ViewSingleRoom(props) {
+function ViewSingleRoom() {
   const location = useLocation()
-  const [navigated, setNavigated] = useState(false)
   const appDispatch = useContext(DispatchContext)
   const appState = useContext(StateContext)
+  // const { room2 } = useContext(RoomContext)
   const [room, setRoom] = useImmer({
     id: "",
     name: "",
@@ -62,8 +66,8 @@ function ViewSingleRoom(props) {
     renderDescription: true,
     renderEditSubPage: false,
     renderBalancerSubPage: false,
-    renderPlayerSubPage: false,
-    renderSettingsSubPage: false
+    renderManagementSubPage: false,
+    isLoading: true
   })
 
   useEffect(() => {
@@ -74,7 +78,6 @@ function ViewSingleRoom(props) {
         const membersArray = responseData.users
         const adminsArray = responseData.admins
 
-        setNavigated(true)
         setRoom(draft => {
           draft.id = responseData.id
           draft.name = responseData.name
@@ -94,20 +97,24 @@ function ViewSingleRoom(props) {
 
         setRoomDates(draft => {
           if (responseData.nextMatchDate) {
-            draft.nextMatchDate = responseData.nextMatchDate.split("T")[0]
+            draft.nextMatchDate = moment(responseData.nextMatchDate.split("T")[0]).format("MMMM DD YYYY")
             draft.nextMatchTime.hour = responseData.nextMatchDate.split("T")[1].split(":")[0]
             draft.nextMatchTime.minute = responseData.nextMatchDate.split("T")[1].split(":")[1]
           }
           if (responseData.nextMatchRegistrationStartDate) {
-            draft.nextMatchRegistrationOpenDate = responseData.nextMatchRegistrationStartDate.split("T")[0]
+            draft.nextMatchRegistrationOpenDate = moment(responseData.nextMatchRegistrationStartDate.split("T")[0]).format("MMMM DD YYYY")
             draft.nextMatchRegistrationOpenTime.hour = responseData.nextMatchRegistrationStartDate.split("T")[1].split(":")[0]
             draft.nextMatchRegistrationOpenTime.minute = responseData.nextMatchRegistrationStartDate.split("T")[1].split(":")[1]
           }
           if (responseData.nextMatchRegistrationEndDate) {
-            draft.nextMatchRegistrationEndDate = responseData.nextMatchRegistrationEndDate.split("T")[0]
+            draft.nextMatchRegistrationEndDate = moment(responseData.nextMatchRegistrationEndDate.split("T")[0]).format("MMMM DD YYYY")
             draft.nextMatchRegistrationEndTime.hour = responseData.nextMatchRegistrationEndDate.split("T")[1].split(":")[0]
             draft.nextMatchRegistrationEndTime.minute = responseData.nextMatchRegistrationEndDate.split("T")[1].split(":")[1]
           }
+        })
+
+        setState(draft => {
+          draft.isLoading = false
         })
       }
     }
@@ -153,7 +160,7 @@ function ViewSingleRoom(props) {
       draft.renderMap = false
       draft.renderEditDates = false
     })
-  }, [state.renderEditSubPage, state.renderBalancerSubPage, state.renderPlayerSubPage, state.renderSettingsSubPage])
+  }, [state.renderEditSubPage, state.renderBalancerSubPage, state.renderManagementSubPage])
 
   function renderMapSwitcher() {
     setState(draft => {
@@ -177,12 +184,40 @@ function ViewSingleRoom(props) {
     }, 1000)
   }
 
+  function renderNotificationBoxButton() {
+    if (room.isUserAdmin || room.isUserMember) {
+      return (
+        <div className="notifications-box-container">
+          <button
+            className="notification-button"
+            onClick={() =>
+              setState(draft => {
+                draft.renderNotificationBox = !draft.renderNotificationBox
+              })
+            }
+          >
+            NOTIFICATIONS | CHAT
+          </button>
+        </div>
+      )
+    }
+  }
+
+  function renderNotifificationBox() {
+    if (room.isUserAdmin) {
+      return <RoomAdminNotificationBox roomId={room.id} isRoomAdmin={room.isUserAdmin} />
+    }
+    if (room.isUserMember) {
+      return <RoomUserNotificationBox roomId={room.id} />
+    }
+    return null
+  }
+
   function resetRenderedSubPages() {
     setState(draft => {
       draft.renderEditSubPage = false
       draft.renderBalancerSubPage = false
-      draft.renderPlayerSubPage = false
-      draft.renderSettingsSubPage = false
+      draft.renderManagementSubPage = false
     })
   }
 
@@ -191,7 +226,9 @@ function ViewSingleRoom(props) {
       draft.name = data.name
       draft.description = data.description
       draft.isPublic = data.isPublic
-      draft.location = data.location
+      if (data.location) {
+        draft.location = data.location
+      }
     })
     setState(draft => {
       draft.renderEditSubPage = false
@@ -218,8 +255,17 @@ function ViewSingleRoom(props) {
   async function handleAddUserRequest() {
     if (!room.isUserMember) {
       try {
-        axios.post(`/api/room/request/new-member-request?roomId=${room.id}&requesterId=${appState.user.id}`, {}, { headers: { Authorization: `Bearer ${appState.user.token}` } })
+        await Axios.post(`/api/room/request/new-member-request?roomId=${room.id}&requesterId=${appState.user.id}`, {}, { headers: { Authorization: `Bearer ${appState.user.token}` } })
       } catch (e) {
+        if (e.response.status === 409) {
+          console.log("There was a problem sending the request" + e)
+          appDispatch({
+            type: "flashMessage",
+            value: "Request already sent !",
+            messageType: "message-red"
+          })
+          return
+        }
         console.log("There was a problem sending the request" + e)
         return
       }
@@ -231,7 +277,9 @@ function ViewSingleRoom(props) {
     }
   }
 
-  if (!navigated) return <NotFound />
+  // console.log(room2)
+
+  if (!location.state || !location.state.navigated) return <NotFound />
   if (state.isLoading) return <Loading />
   return (
     <div>
@@ -240,20 +288,12 @@ function ViewSingleRoom(props) {
         <Link className="text-primary medium font-weight-bold" to={`/`}>
           &laquo; Back HOME
         </Link>
-        <div className="notifications-box-container">
-          <button
-            className="notification-button"
-            onClick={() =>
-              setState(draft => {
-                draft.renderNotificationBox = !draft.renderNotificationBox
-              })
-            }
-          >
-            NOTIFICATIONS | CHAT
-          </button>
-        </div>
+        {/* <div>{room2.name}</div>
+        <div>{room2.description}</div>
+        <div>{room2.public}</div> */}
+        {renderNotificationBoxButton()}
         <CSSTransition in={state.renderNotificationBox} timeout={400} classNames="add-room-text" unmountOnExit>
-          {room.isUserAdmin && <RoomAdminNotificationBox roomId={room.id} />}
+          <>{renderNotifificationBox()}</>
         </CSSTransition>
         <div className="mobile-toggle">
           <h2 className="d-flex ml-auto mobile-toggle">
@@ -269,16 +309,17 @@ function ViewSingleRoom(props) {
               </span>
               <ReactTooltip id={"acccess"} className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
             </div>
-            <text className="d-flex" style={{ fontSize: "20px", fontFamily: "Georgia" }}>
-              <a
+            <a className="d-flex" style={{ fontSize: "20px", fontFamily: "Georgia" }}>
+              <p
                 style={{
                   fontSize: "20px",
-                  fontVariantCaps: "small-caps"
+                  fontVariantCaps: "small-caps",
+                  marginBottom: "0px"
                 }}
               >
                 {room.name}
-              </a>
-            </text>
+              </p>
+            </a>
           </h2>
         </div>
         <div className="content d-flex flex-column mt-1">
@@ -301,7 +342,6 @@ function ViewSingleRoom(props) {
                 <div>
                   <EditRoomDates
                     roomId={room.id}
-                    dates={roomDates}
                     onSubmit={handleDatesUpdate}
                     onCancel={() =>
                       setState(draft => {
@@ -318,7 +358,6 @@ function ViewSingleRoom(props) {
                 </>
               </CSSTransition>
             </div>
-
             <div className="d-flex flex-column mr-2 ml-4 mt-1 align-items-center">
               <span style={getStyleForBasicInfoSpan("white")}>Next match on:</span>
               <span style={getStyleForBasicInfoSpan("wheat")}>{roomDates.nextMatchDate ? roomDates.nextMatchDate : "N/A"}</span>
@@ -327,7 +366,6 @@ function ViewSingleRoom(props) {
                 calendar_month
               </span>
               <ReactTooltip id={"calendar"} className="custom-tooltip" delayShow={1000} />
-
               <span style={getStyleForBasicInfoSpan("white")}>Registration opens on:</span>
               <span style={getStyleForBasicInfoSpan("wheat")}>{roomDates.nextMatchRegistrationOpenDate ? roomDates.nextMatchRegistrationOpenDate : "N/A"}</span>
               <span style={getStyleForBasicInfoSpan("wheat")}>{roomDates.nextMatchRegistrationOpenTime.hour ? roomDates.nextMatchRegistrationOpenTime.hour + " : " + roomDates.nextMatchRegistrationOpenTime.minute : "N/A"}</span>
@@ -338,12 +376,25 @@ function ViewSingleRoom(props) {
             </div>
           </div>
           <div className="d-flex flex-row mt-1 justify-content-center align-items-center">
-            <CustomMaterialSymbol name={"map"} fontSize={"30px"} fontColor={"#373991"} cursor={"pointer"} onClick={renderMapSwitcher} />
+            {!state.renderMap ? (
+              <CustomMaterialSymbol name={"map"} fontSize={"30px"} fontColor={"#373991"} cursor={"pointer"} onClick={renderMapSwitcher} />
+            ) : (
+              <CustomMaterialSymbol
+                name={"cancel"}
+                fontSize={"30px"}
+                fontColor={"#373991"}
+                cursor={"pointer"}
+                onClick={() =>
+                  setState(draft => {
+                    draft.renderMap = false
+                  })
+                }
+              />
+            )}
             <span style={getStyleForBasicInfoSpan("wheat")}>{room.location.city ? room.location.city : "N/A"}</span>
             <span style={getStyleForBasicInfoSpan("wheat")}>{room.location.street ? ", st. " + room.location.street + " " + room.location.number : ", N/A"}</span>
           </div>
         </div>
-
         <ul className="menu" style={{ fontVariant: "all-small-caps", cursor: "pointer" }}>
           <li>
             <a
@@ -363,23 +414,11 @@ function ViewSingleRoom(props) {
               onClick={() => {
                 resetRenderedSubPages()
                 setState(draft => {
-                  draft.renderPlayerSubPage = true
+                  draft.renderManagementSubPage = true
                 })
               }}
             >
-              Player List
-            </a>
-          </li>
-          <li>
-            <a
-              onClick={() => {
-                resetRenderedSubPages()
-                setState(draft => {
-                  draft.renderSettingsSubPage = true
-                })
-              }}
-            >
-              Settings
+              Management
             </a>
           </li>
           {room.isUserAdmin && (
@@ -400,6 +439,9 @@ function ViewSingleRoom(props) {
       </div>
       <CSSTransition in={state.renderEditSubPage} timeout={400} classNames="add-room-text" unmountOnExit>
         {<EditRoomBasic room={room} onSubmit={handleRoomEdit} />}
+      </CSSTransition>
+      <CSSTransition in={state.renderManagementSubPage} timeout={400} classNames="add-room-text" unmountOnExit>
+        {<RoomManagement room={room} setRoom={setRoom} />}
       </CSSTransition>
     </div>
   )
