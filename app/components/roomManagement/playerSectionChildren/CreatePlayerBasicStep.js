@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react"
 import Axios from "axios"
 import StateContext from "../../../StateContext"
 import DispatchContext from "../../../DispatchContext"
+import { RoomContext } from "../../RoomContext"
 import { useImmer } from "use-immer"
 import CustomMaterialSymbol from "../../CustomMaterialSymbol"
 import User from "./User"
@@ -9,19 +10,20 @@ import User from "./User"
 function CreatePlayerBasicStep(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
+  const { room, roomMetaInfo, setRoom } = useContext(RoomContext)
   const [state, setState] = useImmer({
     renderBasicInfoView: true,
     renderProvideSkillPointsStep: false,
     renderLinkPlayerWithUser: false
   })
-  const roomMembers = props.room.members
-  const roomId = props.room.id
   const [player, setPlayer] = useImmer({
     firstName: "",
     lastName: "",
     sex: "",
     linkedUser: ""
   })
+
+  console.log(room)
 
   function renderRoomMembers() {
     return (
@@ -32,8 +34,8 @@ function CreatePlayerBasicStep(props) {
           <div style={{ width: "20%", borderRight: "1px solid black", borderBottom: "1px solid black" }}>Last Name</div>
           <div style={{ width: "20%", borderBottom: "1px solid black" }}>Linked</div>
         </div>
-        {roomMembers.map(user => {
-          return <User key={user.id} user={user} roomId={roomId} setLinkedUser={user => setPlayerBaseOnLinkedUser(user)} linkedUser={player.linkedUser} />
+        {room.users.map(user => {
+          return <User key={user.id} user={user} roomId={room.id} setLinkedUser={user => setPlayerBaseOnLinkedUser(user)} linkedUser={player.linkedUser} />
         })}
       </>
     )
@@ -74,7 +76,7 @@ function CreatePlayerBasicStep(props) {
           firstName: player.firstName,
           lastName: player.lastName,
           sex: player.sex,
-          roomId: roomId,
+          roomId: room.id,
           roomAdminId: appState.user.id,
           userToLinkId: player.linkedUser.id
         },
@@ -83,7 +85,7 @@ function CreatePlayerBasicStep(props) {
 
       if (response.data) {
         props.submitBasicStep(response.data)
-        props.setRoom(draft => {
+        setRoom(draft => {
           draft.members
             .filter(user => user.id === player.linkedUser.id)
             .forEach(user => {

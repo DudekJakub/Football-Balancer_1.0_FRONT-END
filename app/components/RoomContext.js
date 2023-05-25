@@ -1,39 +1,53 @@
-import React, { createContext, useState, useEffect } from "react"
+import React, { createContext, useState, useContext, useEffect } from "react"
+import Axios from "axios"
+import StateContext from "../StateContext"
+import DispatchContext from "../DispatchContext"
+import moment from "moment/moment"
+import { useImmer } from "use-immer"
 
 export const RoomContext = createContext()
 
 export const RoomProvider = ({ children }) => {
-  // const [room, setRoom] = useState({
-  //   id: "",
-  //   name: "",
-  //   description: "",
-  //   isPublic: false
-  //   // ...rest of the properties
-  // })
-  const [roomToFetchId, setRoomToFetchId] = useState("")
-  const [room2, setRoom] = useState(() => {
-    const storedRoom = localStorage.getItem("room")
-    return storedRoom ? JSON.parse(storedRoom) : ""
+  const appState = useContext(StateContext)
+  const appDispatch = useContext(DispatchContext)
+  const [roomId, setRoomId] = useState("")
+  const [roomPassword, setRoomPassword] = useState("")
+  const [wrongPassword, setWrongPassword] = useState(false)
+  const [readyToEnter, setReadyToEnter] = useState(false)
+  const [room, setRoom] = useState("")
+  const [roomMetaInfo, setRoomMetaInfo] = useImmer({
+    isUserAdmin: false,
+    isUserMember: false,
+    dataReady: false
   })
-
-  const [roomDates, setRoomDates] = useState({
+  const [roomDates, setRoomDates] = useImmer({
     nextMatchDate: "",
     nextMatchTime: {
       hour: "",
       minute: ""
-    }
-    // ...rest of the properties
+    },
+    nextMatchRegistrationOpenDate: "",
+    nextMatchRegistrationOpenTime: {
+      hour: "",
+      minute: ""
+    },
+    nextMatchRegistrationEndDate: "",
+    nextMatchRegistrationEndTime: {
+      hour: "",
+      minute: ""
+    },
+    dataReady: false
   })
 
   useEffect(() => {
-    if (roomToFetchId) {
+    if (roomId) {
       async function fetchRoomData() {
         try {
           const response = await Axios.post(
             `/api/room/basic-management/enter`,
             {
-              password: state.providedRoomPassword,
-              roomId: state.roomId,
+              password: roomPassword,
+              roomId: roomId,
               userId: appState.user.id
             },
             { headers: { Authorization: `Bearer ${appState.user.token}` } }
@@ -45,23 +59,66 @@ export const RoomProvider = ({ children }) => {
               value: "Joined the room!",
               messageType: "message-green"
             })
-            navigate(`/room/${state.roomId}`, { state: { responseData: response.data, navigated: true } })
 
-            // setRoom(response.data)
+            setRoom(response.data)
+            setRoomMetaInfo(draft => {
+              draft.isUserAdmin = response.data.users.filter(admin => admin.id == appState.user.id).length > 0
+              draft.isUserMember = response.data.admins.filter(member => member.id == appState.user.id).length > 0
+              draft.dataReady = true
+            })
+            setRoomDates(draft => {
+              if (response.data.nextMatchDate) {
+                draft.nextMatchDate = moment(response.data.nextMatchDate.split("T")[0]).format("MMMM DD YYYY")
+                draft.nextMatchTime.hour = response.data.nextMatchDate.split("T")[1].split(":")[0]
+                draft.nextMatchTime.minute = response.data.nextMatchDate.split("T")[1].split(":")[1]
+              }
+              if (response.data.nextMatchRegistrationStartDate) {
+                draft.nextMatchRegistrationOpenDate = moment(response.data.nextMatchRegistrationStartDate.split("T")[0]).format("MMMM DD YYYY")
+                draft.nextMatchRegistrationOpenTime.hour = response.data.nextMatchRegistrationStartDate.split("T")[1].split(":")[0]
+                draft.nextMatchRegistrationOpenTime.minute = response.data.nextMatchRegistrationStartDate.split("T")[1].split(":")[1]
+              }
+              if (response.data.nextMatchRegistrationEndDate) {
+                draft.nextMatchRegistrationEndDate = moment(response.data.nextMatchRegistrationEndDate.split("T")[0]).format("MMMM DD YYYY")
+                draft.nextMatchRegistrationEndTime.hour = response.data.nextMatchRegistrationEndDate.split("T")[1].split(":")[0]
+                draft.nextMatchRegistrationEndTime.minute = response.data.nextMatchRegistrationEndDate.split("T")[1].split(":")[1]
+              }
+              draft.dataReady = true
+            })
           }
         } catch (e) {
           console.log("There was a problem or the request was cancelled." + e)
-
           if (e.response.status === 401) {
-            setState(draft => {
-              draft.wrongPasswordMessage = "WRONG PASSWORD"
-            })
+            setWrongPassword(true)
           }
         }
       }
+      fetchRoomData()
     }
-    localStorage.setItem("room", JSON.stringify(room2))
-  }, [roomToFetchId])
+  }, [roomId])
 
-  return <RoomContext.Provider value={{ room2, setRoom, roomDates, setRoomDates }}>{children}</RoomContext.Provider>
+  useEffect(() => {
+    if (room && roomMetaInfo && roomMetaInfo.dataReady && roomDates && roomDates.dataReady) {
+      setReadyToEnter(true)
+    }
+  }, [room, roomMetaInfo, roomDates])
+
+  return (
+    <RoomContext.Provider
+      value={{
+        setRoomId,
+        setRoomPassword,
+        wrongPassword,
+        readyToEnter,
+        setReadyToEnter,
+        room,
+        setRoom,
+        roomMetaInfo,
+        setRoomMetaInfo,
+        roomDates,
+        setRoomDates
+      }}
+    >
+      {children}
+    </RoomContext.Provider>
+  )
 }

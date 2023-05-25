@@ -11,18 +11,18 @@ import { RoomContext } from "./RoomContext"
 function EditRoomBasic(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
-  const { room2, setRoom } = useContext(RoomContext)
+  const { room, setRoom } = useContext(RoomContext)
   const [state, setState] = useState({
-    name: props.room.name,
-    description: props.room.description,
-    isPublic: props.room.isPublic
+    name: room.name,
+    description: room.description,
+    isPublic: room.public
   })
   const [isLocationAddAreaVisible, setIsLocationAddAreaVisible] = useState(false)
   const [location, setLocation] = useState({
-    city: props.room.location.city,
-    zipCode: props.room.location.zipCode,
-    street: props.room.location.street,
-    number: props.room.location.number
+    city: room.location.city,
+    zipCode: room.location.zipCode,
+    street: room.location.street,
+    number: room.location.number
   })
 
   function handleNameChange(newValue) {
@@ -95,26 +95,33 @@ function EditRoomBasic(props) {
     async function updateRoom() {
       try {
         const response = await Axios.put(
-          `/api/room/basic-management/${props.room.id}`,
+          `/api/room/basic-management/${room.id}`,
           {
             roomAdminId: appState.user.id,
             name: state.name,
             description: state.description,
             public: state.isPublic,
-            location: location
+            location: isLocationAddAreaVisible ? location : null
           },
           { headers: { Authorization: `Bearer ${appState.user.token}` } },
           { cancelToken: ourRequest.token }
         )
         if (response.data) {
-          props.onSubmit({ name: response.data.name, description: response.data.description, isPublic: response.data.public, location: response.data.location })
+          setRoom(prevRoom => ({
+            ...prevRoom,
+            name: response.data.name,
+            description: response.data.description,
+            public: response.data.public
+          }))
 
-          // setRoom(prevRoom => ({
-          //   ...prevRoom,
-          //   name: response.data.name,
-          //   description: response.data.description,
-          //   public: response.data.public
-          // }))
+          if (response.data.location) {
+            setRoom(prevRoom => ({
+              ...prevRoom,
+              location: response.data.location
+            }))
+          }
+
+          props.onSubmit()
 
           appDispatch({
             type: "flashMessage",
@@ -148,7 +155,7 @@ function EditRoomBasic(props) {
               optionElements={() => (
                 <>
                   <option selected disabled>
-                    CURRENT: {props.room.isPublic ? "PUBLIC" : "PRIVATE"}
+                    CURRENT: {room.public ? "PUBLIC" : "PRIVATE"}
                   </option>
                   <option>{"PUBLIC"}</option>
                   <option>{"PRIVATE"}</option>

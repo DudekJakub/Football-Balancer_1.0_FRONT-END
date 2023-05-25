@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from "react"
-import { Link, useLocation } from "react-router-dom"
+import React, { useEffect, useContext } from "react"
+import { Link, useParams } from "react-router-dom"
 import ReactTooltip from "react-tooltip"
 import { useImmer } from "use-immer"
 import { CSSTransition } from "react-transition-group"
@@ -7,58 +7,22 @@ import { RoomContext } from "./RoomContext"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 import Loading from "./Loading"
-import NotFound from "./NotFound"
 import RenderAvatar from "./Avatar"
 import EditRoomBasic from "./EditRoomBasic"
 import CustomMaterialSymbol from "./CustomMaterialSymbol"
-import moment from "moment/moment"
 import EditRoomDates from "./EditRoomDates"
 import Map from "./Map"
 import Axios from "axios"
 import RoomManagement from "./roomManagement/RoomManagement"
 import RoomAdminNotificationBox from "./notifications/RoomAdminNotificationBox"
 import RoomUserNotificationBox from "./notifications/RoomUserNotificationBox"
+import PasswordOverlay from "./PasswordOverlay"
 
 function ViewSingleRoom() {
-  const location = useLocation()
   const appDispatch = useContext(DispatchContext)
   const appState = useContext(StateContext)
-  // const { room2 } = useContext(RoomContext)
-  const [room, setRoom] = useImmer({
-    id: "",
-    name: "",
-    description: "",
-    isPublic: false,
-    isUserAdmin: false,
-    isUserMember: false,
-    admins: [],
-    members: [],
-    location: {
-      city: "",
-      zipCode: "",
-      street: "",
-      number: "",
-      latitude: "",
-      longitude: ""
-    }
-  })
-  const [roomDates, setRoomDates] = useImmer({
-    nextMatchDate: "",
-    nextMatchTime: {
-      hour: "",
-      minute: ""
-    },
-    nextMatchRegistrationOpenDate: "",
-    nextMatchRegistrationOpenTime: {
-      hour: "",
-      minute: ""
-    },
-    nextMatchRegistrationEndDate: "",
-    nextMatchRegistrationEndTime: {
-      hour: "",
-      minute: ""
-    }
-  })
+  const roomId = useParams().id
+  const { room, roomMetaInfo, roomDates, setRoom, readyToEnter, setReadyToEnter } = useContext(RoomContext)
   const [state, setState] = useImmer({
     renderNotificationBox: false,
     renderEditDates: false,
@@ -67,66 +31,28 @@ function ViewSingleRoom() {
     renderEditSubPage: false,
     renderBalancerSubPage: false,
     renderManagementSubPage: false,
+    renderPasswordOverlay: false,
     isLoading: true
   })
 
   useEffect(() => {
-    function fetchData() {
-      if (location.state === undefined || location.state == null) return
-      if (location.state.navigated) {
-        const responseData = location.state.responseData
-        const membersArray = responseData.users
-        const adminsArray = responseData.admins
-
-        setRoom(draft => {
-          draft.id = responseData.id
-          draft.name = responseData.name
-          draft.description = responseData.description == null ? "" : responseData.description
-          draft.isPublic = responseData.public
-          draft.isUserAdmin = adminsArray.filter(admin => admin.id == appState.user.id).length > 0
-          draft.isUserMember = membersArray.filter(member => member.id == appState.user.id).length > 0
-          draft.admins = adminsArray
-          draft.members = membersArray
-          draft.location.city = responseData.location.city
-          draft.location.zipCode = responseData.location.zipCode
-          draft.location.street = responseData.location.street
-          draft.location.number = responseData.location.number
-          draft.location.latitude = responseData.location.latitude
-          draft.location.longitude = responseData.location.longitude
-        })
-
-        setRoomDates(draft => {
-          if (responseData.nextMatchDate) {
-            draft.nextMatchDate = moment(responseData.nextMatchDate.split("T")[0]).format("MMMM DD YYYY")
-            draft.nextMatchTime.hour = responseData.nextMatchDate.split("T")[1].split(":")[0]
-            draft.nextMatchTime.minute = responseData.nextMatchDate.split("T")[1].split(":")[1]
-          }
-          if (responseData.nextMatchRegistrationStartDate) {
-            draft.nextMatchRegistrationOpenDate = moment(responseData.nextMatchRegistrationStartDate.split("T")[0]).format("MMMM DD YYYY")
-            draft.nextMatchRegistrationOpenTime.hour = responseData.nextMatchRegistrationStartDate.split("T")[1].split(":")[0]
-            draft.nextMatchRegistrationOpenTime.minute = responseData.nextMatchRegistrationStartDate.split("T")[1].split(":")[1]
-          }
-          if (responseData.nextMatchRegistrationEndDate) {
-            draft.nextMatchRegistrationEndDate = moment(responseData.nextMatchRegistrationEndDate.split("T")[0]).format("MMMM DD YYYY")
-            draft.nextMatchRegistrationEndTime.hour = responseData.nextMatchRegistrationEndDate.split("T")[1].split(":")[0]
-            draft.nextMatchRegistrationEndTime.minute = responseData.nextMatchRegistrationEndDate.split("T")[1].split(":")[1]
-          }
-        })
-
-        setState(draft => {
-          draft.isLoading = false
-        })
-      }
+    if (readyToEnter) {
+      setState(draft => {
+        draft.isLoading = false
+      })
+    } else {
+      setState(draft => {
+        draft.renderPasswordOverlay = true
+      })
     }
-    fetchData()
-  }, [])
+  }, [readyToEnter])
 
   function getStyleForBasicInfoSpan(color) {
     return { color: color, whiteSpace: "nowrap", fontVariant: "all-small-caps" }
   }
 
   function renderUploadPhotoButton() {
-    if (room.isUserAdmin) {
+    if (roomMetaInfo.isUserAdmin) {
       return (
         <div className="d-flex flex-row mt-3 ml-3">
           <Link to={""} data-tip="Upload" data-for="upload" className="text-primary mr-2">
@@ -185,7 +111,7 @@ function ViewSingleRoom() {
   }
 
   function renderNotificationBoxButton() {
-    if (room.isUserAdmin || room.isUserMember) {
+    if (roomMetaInfo.isUserAdmin || roomMetaInfo.isUserMember) {
       return (
         <div className="notifications-box-container">
           <button
@@ -204,10 +130,10 @@ function ViewSingleRoom() {
   }
 
   function renderNotifificationBox() {
-    if (room.isUserAdmin) {
-      return <RoomAdminNotificationBox roomId={room.id} isRoomAdmin={room.isUserAdmin} />
+    if (roomMetaInfo.isUserAdmin) {
+      return <RoomAdminNotificationBox roomId={room.id} isRoomAdmin={roomMetaInfo.isUserAdmin} />
     }
-    if (room.isUserMember) {
+    if (roomMetaInfo.isUserMember) {
       return <RoomUserNotificationBox roomId={room.id} />
     }
     return null
@@ -221,39 +147,8 @@ function ViewSingleRoom() {
     })
   }
 
-  function handleRoomEdit(data) {
-    setRoom(draft => {
-      draft.name = data.name
-      draft.description = data.description
-      draft.isPublic = data.isPublic
-      if (data.location) {
-        draft.location = data.location
-      }
-    })
-    setState(draft => {
-      draft.renderEditSubPage = false
-    })
-  }
-
-  function handleDatesUpdate(data) {
-    setRoomDates(draft => {
-      draft.nextMatchDate = data.nextMatchDate
-      draft.nextMatchTime.hour = data.nextMatchTime.hour
-      draft.nextMatchTime.minute = data.nextMatchTime.minute
-      draft.nextMatchRegistrationOpenDate = data.nextMatchRegistrationOpenDate
-      draft.nextMatchRegistrationOpenTime.hour = data.nextMatchRegistrationOpenTime.hour
-      draft.nextMatchRegistrationOpenTime.minute = data.nextMatchRegistrationOpenTime.minute
-      draft.nextMatchRegistrationEndDate = data.nextMatchRegistrationEndDate
-      draft.nextMatchRegistrationEndTime.hour = data.nextMatchRegistrationEndTime.hour
-      draft.nextMatchRegistrationEndTime.minute = data.nextMatchRegistrationEndTime.minute
-    })
-    setState(draft => {
-      draft.renderEditDates = false
-    })
-  }
-
   async function handleAddUserRequest() {
-    if (!room.isUserMember) {
+    if (!roomMetaInfo.isUserMember) {
       try {
         await Axios.post(`/api/room/request/new-member-request?roomId=${room.id}&requesterId=${appState.user.id}`, {}, { headers: { Authorization: `Bearer ${appState.user.token}` } })
       } catch (e) {
@@ -277,35 +172,40 @@ function ViewSingleRoom() {
     }
   }
 
-  // console.log(room2)
-
-  if (!location.state || !location.state.navigated) return <NotFound />
+  if (state.renderPasswordOverlay)
+    return (
+      <PasswordOverlay
+        roomId={roomId}
+        onSubmit={() =>
+          setState(draft => {
+            draft.renderPasswordOverlay = false
+          })
+        }
+      />
+    )
   if (state.isLoading) return <Loading />
   return (
-    <div>
+    <div className={state.renderPasswordOverlay ? "search-overlay-top shadow-sm" : ""}>
       <div className="main d-flex flex-column container">
         <div className="mt-5"></div>
-        <Link className="text-primary medium font-weight-bold" to={`/`}>
+        <Link className="text-primary medium font-weight-bold" to={`/`} onClick={() => setReadyToEnter(false)}>
           &laquo; Back HOME
         </Link>
-        {/* <div>{room2.name}</div>
-        <div>{room2.description}</div>
-        <div>{room2.public}</div> */}
         {renderNotificationBoxButton()}
         <CSSTransition in={state.renderNotificationBox} timeout={400} classNames="add-room-text" unmountOnExit>
           <>{renderNotifificationBox()}</>
         </CSSTransition>
         <div className="mobile-toggle">
           <h2 className="d-flex ml-auto mobile-toggle">
-            <div className="d-flex p-2 align-items-center" data-tip={room.isUserMember ? "YOU'RE MEMBER" : "YOU AREN'T MEMBER YET. SEND REQUEST NOW!"} data-for={"acccess"}>
-              <span className="material-symbols-outlined" style={{ fontSize: "25px", color: room.isUserMember ? "darkgreen" : "darkred", cursor: "pointer" }} onClick={handleAddUserRequest}>
-                {room.isUserMember ? "person" : "person_add"}
+            <div className="d-flex p-2 align-items-center" data-tip={roomMetaInfo.isUserMember ? "YOU'RE MEMBER" : "YOU AREN'T MEMBER YET. SEND REQUEST NOW!"} data-for={"acccess"}>
+              <span className="material-symbols-outlined" style={{ fontSize: "25px", color: roomMetaInfo.isUserMember ? "darkgreen" : "darkred", cursor: "pointer" }} onClick={handleAddUserRequest}>
+                {roomMetaInfo.isUserMember ? "person" : "person_add"}
               </span>
               <ReactTooltip id={"acccess"} className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
             </div>
-            <div className="d-flex p-2 align-items-center" data-tip={room.isPublic ? "ROOM IS PUBLIC" : "ROOM IS PRIVATE"} data-for={"acccess"}>
-              <span className="material-symbols-outlined mr-2" style={{ fontSize: "25px", color: room.isPublic ? "darkgreen" : "darkred", cursor: "pointer" }}>
-                {room.isPublic ? "lock_open" : "lock"}
+            <div className="d-flex p-2 align-items-center" data-tip={room.public ? "ROOM IS PUBLIC" : "ROOM IS PRIVATE"} data-for={"acccess"}>
+              <span className="material-symbols-outlined mr-2" style={{ fontSize: "25px", color: room.public ? "darkgreen" : "darkred", cursor: "pointer" }}>
+                {room.public ? "lock_open" : "lock"}
               </span>
               <ReactTooltip id={"acccess"} className="custom-tooltip" style={{ fontVariant: "small-caps", position: "static" }} delayShow={500} />
             </div>
@@ -341,8 +241,11 @@ function ViewSingleRoom() {
               <CSSTransition in={state.renderEditDates} timeout={1000} classNames="add-calendar" unmountOnExit>
                 <div>
                   <EditRoomDates
-                    roomId={room.id}
-                    onSubmit={handleDatesUpdate}
+                    onSubmit={() =>
+                      setState(draft => {
+                        draft.renderEditDates = false
+                      })
+                    }
                     onCancel={() =>
                       setState(draft => {
                         draft.renderEditDates = false
@@ -421,7 +324,7 @@ function ViewSingleRoom() {
               Management
             </a>
           </li>
-          {room.isUserAdmin && (
+          {roomMetaInfo.isUserAdmin && (
             <li>
               <a
                 onClick={() => {
@@ -438,7 +341,15 @@ function ViewSingleRoom() {
         </ul>
       </div>
       <CSSTransition in={state.renderEditSubPage} timeout={400} classNames="add-room-text" unmountOnExit>
-        {<EditRoomBasic room={room} onSubmit={handleRoomEdit} />}
+        {
+          <EditRoomBasic
+            onSubmit={() =>
+              setState(draft => {
+                draft.renderEditSubPage = false
+              })
+            }
+          />
+        }
       </CSSTransition>
       <CSSTransition in={state.renderManagementSubPage} timeout={400} classNames="add-room-text" unmountOnExit>
         {<RoomManagement room={room} setRoom={setRoom} />}

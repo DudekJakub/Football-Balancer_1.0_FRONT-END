@@ -106,9 +106,9 @@ function Main() {
   }, [state.loggedIn])
 
   return (
-    <RoomProvider>
-      <StateContext.Provider value={state}>
-        <DispatchContext.Provider value={dispatch}>
+    <StateContext.Provider value={state}>
+      <DispatchContext.Provider value={dispatch}>
+        <RoomProvider>
           <BrowserRouter>
             <FlashMessages messages={state.flashMessages} />
             <Navbar />
@@ -132,9 +132,9 @@ function Main() {
             {state.loggedIn ? <Logout /> : null}
             <Footer />
           </BrowserRouter>
-        </DispatchContext.Provider>
-      </StateContext.Provider>
-    </RoomProvider>
+        </RoomProvider>
+      </DispatchContext.Provider>
+    </StateContext.Provider>
   )
 }
 

@@ -6,13 +6,15 @@ import { CSSTransition } from "react-transition-group"
 import SubmitOrCancelButton from "./SubmitOrCancelButton"
 import Calendar from "./Calendar"
 import TimeSelector from "./TimeSelector"
+import { RoomContext } from "./RoomContext"
 import StateContext from "../StateContext"
 import DispatchContext from "../DispatchContext"
 
 function EditRoomDates(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
-  const [roomDates, setRoomDates] = useImmer({
+  const { room, setRoomDates } = useContext(RoomContext)
+  const [roomEditDates, setRoomEditDates] = useImmer({
     nextMatchDate: "",
     nextMatchTime: {
       hour: "00",
@@ -60,7 +62,7 @@ function EditRoomDates(props) {
   }
 
   function goToRegistrationOpenDateStage() {
-    const nextMatchDateFormated = mapDateInOneFormat(roomDates.nextMatchDate, roomDates.nextMatchTime.hour, roomDates.nextMatchTime.minute)
+    const nextMatchDateFormated = mapDateInOneFormat(roomEditDates.nextMatchDate, roomEditDates.nextMatchTime.hour, roomEditDates.nextMatchTime.minute)
     const now = new Date()
 
     if (nextMatchDateFormated < now) {
@@ -74,7 +76,7 @@ function EditRoomDates(props) {
     setState(draft => {
       draft.setNextMatchDateStage = false
     })
-    setRoomDates(draft => {
+    setRoomEditDates(draft => {
       draft.nextMatchDateFormated = nextMatchDateFormated
     })
     setTimeout(() => {
@@ -85,9 +87,9 @@ function EditRoomDates(props) {
   }
 
   function goToRegistrationEndDateStage() {
-    const nextMatchRegistrationOpenDateFormated = mapDateInOneFormat(roomDates.nextMatchRegistrationOpenDate, roomDates.nextMatchRegistrationOpenTime.hour, roomDates.nextMatchRegistrationOpenTime.minute)
+    const nextMatchRegistrationOpenDateFormated = mapDateInOneFormat(roomEditDates.nextMatchRegistrationOpenDate, roomEditDates.nextMatchRegistrationOpenTime.hour, roomEditDates.nextMatchRegistrationOpenTime.minute)
 
-    if (nextMatchRegistrationOpenDateFormated > roomDates.nextMatchDateFormated) {
+    if (nextMatchRegistrationOpenDateFormated > roomEditDates.nextMatchDateFormated) {
       setError(draft => {
         draft.registrationOpenDateMessage = "Registration open date cannot be after the match!"
         draft.withRegistrationOpenDate = true
@@ -98,7 +100,7 @@ function EditRoomDates(props) {
     setState(draft => {
       draft.setRegistrationOpenDateStage = false
     })
-    setRoomDates(draft => {
+    setRoomEditDates(draft => {
       draft.nextMatchRegistrationOpenDateFormated = nextMatchRegistrationOpenDateFormated
     })
     setTimeout(() => {
@@ -113,17 +115,32 @@ function EditRoomDates(props) {
       const ourRequest = Axios.CancelToken.source()
       async function submitDatesChange() {
         try {
-          await Axios.patch(
-            `/api/room/basic-management/next-match-all-dates/${props.roomId}`,
+          const response = await Axios.patch(
+            `/api/room/basic-management/next-match-all-dates/${room.id}`,
             {
-              nextMatchDate: roomDates.nextMatchDateFormated,
-              nextMatchRegistrationStartDate: roomDates.nextMatchRegistrationOpenDateFormated,
-              nextMatchRegistrationEndDate: roomDates.nextMatchRegistrationEndDateFormated,
+              nextMatchDate: roomEditDates.nextMatchDateFormated,
+              nextMatchRegistrationStartDate: roomEditDates.nextMatchRegistrationOpenDateFormated,
+              nextMatchRegistrationEndDate: roomEditDates.nextMatchRegistrationEndDateFormated,
               roomAdminId: appState.user.id
             },
             { headers: { Authorization: `Bearer ${appState.user.token}` } },
             { cancelToken: ourRequest.token }
           )
+
+          if (response.status === 204) {
+            setRoomDates(draft => {
+              draft.nextMatchDate = roomEditDates.nextMatchDate
+              draft.nextMatchTime.hour = roomEditDates.nextMatchTime.hour
+              draft.nextMatchTime.minute = roomEditDates.nextMatchTime.minute
+              draft.nextMatchRegistrationOpenDate = roomEditDates.nextMatchRegistrationOpenDate
+              draft.nextMatchRegistrationOpenTime.hour = roomEditDates.nextMatchRegistrationOpenTime.hour
+              draft.nextMatchRegistrationOpenTime.minute = roomEditDates.nextMatchRegistrationOpenTime.minute
+              draft.nextMatchRegistrationEndDate = roomEditDates.nextMatchRegistrationEndDate
+              draft.nextMatchRegistrationEndTime.hour = roomEditDates.nextMatchRegistrationEndTime.hour
+              draft.nextMatchRegistrationEndTime.minute = roomEditDates.nextMatchRegistrationEndTime.minute
+            })
+            props.onSubmit()
+          }
         } catch (e) {
           console.log("There was a problem updating next match dates " + e)
           return
@@ -135,7 +152,7 @@ function EditRoomDates(props) {
         })
       }
       submitDatesChange()
-      props.onSubmit(roomDates)
+
       return () => {
         ourRequest.cancel()
       }
@@ -143,16 +160,16 @@ function EditRoomDates(props) {
   }, [state.setAllStagesComplete])
 
   function finalizeStages() {
-    const nextMatchRegistrationEndDateFormated = mapDateInOneFormat(roomDates.nextMatchRegistrationEndDate, roomDates.nextMatchRegistrationEndTime.hour, roomDates.nextMatchRegistrationEndTime.minute)
+    const nextMatchRegistrationEndDateFormated = mapDateInOneFormat(roomEditDates.nextMatchRegistrationEndDate, roomEditDates.nextMatchRegistrationEndTime.hour, roomEditDates.nextMatchRegistrationEndTime.minute)
 
-    if (nextMatchRegistrationEndDateFormated < roomDates.nextMatchRegistrationOpenDateFormated) {
+    if (nextMatchRegistrationEndDateFormated < roomEditDates.nextMatchRegistrationOpenDateFormated) {
       setError(draft => {
         draft.registrationEndDateMessage = "Registration end date cannot be before the registration open date!"
         draft.withRegistrationEndDate = true
       })
       return
     }
-    if (nextMatchRegistrationEndDateFormated > roomDates.nextMatchDateFormated) {
+    if (nextMatchRegistrationEndDateFormated > roomEditDates.nextMatchDateFormated) {
       setError(draft => {
         draft.registrationEndDateMessage = "Registration end date cannot be after the next match date!"
         draft.withRegistrationEndDate = true
@@ -160,7 +177,7 @@ function EditRoomDates(props) {
       return
     }
 
-    setRoomDates(draft => {
+    setRoomEditDates(draft => {
       draft.nextMatchRegistrationEndDateFormated = nextMatchRegistrationEndDateFormated
     })
     setState(draft => {
@@ -187,7 +204,7 @@ function EditRoomDates(props) {
     setError(draft => {
       ;(draft.withNextMatchDate = false), (draft.nextMatchDateMessage = ""), (draft.withRegistrationOpenDate = false), (draft.registrationOpenDateMessage = ""), (draft.withRegistrationEndDate = false), (draft.registrationEndDateMessage = "")
     })
-  }, [roomDates.nextMatchDate, roomDates.nextMatchTime, roomDates.nextMatchRegistrationOpenDate, roomDates.nextMatchRegistrationOpenTime, roomDates.nextMatchRegistrationEndDate, roomDates.nextMatchRegistrationEndTime])
+  }, [roomEditDates.nextMatchDate, roomEditDates.nextMatchTime, roomEditDates.nextMatchRegistrationOpenDate, roomEditDates.nextMatchRegistrationOpenTime, roomEditDates.nextMatchRegistrationEndDate, roomEditDates.nextMatchRegistrationEndTime])
 
   return (
     <div style={{ display: "table-caption" }}>
@@ -196,21 +213,21 @@ function EditRoomDates(props) {
         <a>
           <Calendar
             chosenDate={newDate =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchDate = newDate
               })
             }
           />
           <TimeSelector
-            hour={roomDates.nextMatchTime.hour}
-            minute={roomDates.nextMatchTime.minute}
+            hour={roomEditDates.nextMatchTime.hour}
+            minute={roomEditDates.nextMatchTime.minute}
             onChangeHour={newHour =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchTime.hour = newHour.target.value
               })
             }
             onChangeMinute={newMinute =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchTime.minute = newMinute.target.value
               })
             }
@@ -224,21 +241,21 @@ function EditRoomDates(props) {
         <a>
           <Calendar
             chosenDate={newDate =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationOpenDate = newDate
               })
             }
           />
           <TimeSelector
-            hour={roomDates.nextMatchRegistrationOpenTime.hour}
-            minute={roomDates.nextMatchRegistrationOpenTime.minute}
+            hour={roomEditDates.nextMatchRegistrationOpenTime.hour}
+            minute={roomEditDates.nextMatchRegistrationOpenTime.minute}
             onChangeHour={newHour =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationOpenTime.hour = newHour.target.value
               })
             }
             onChangeMinute={newMinute =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationOpenTime.minute = newMinute.target.value
               })
             }
@@ -252,21 +269,21 @@ function EditRoomDates(props) {
         <a>
           <Calendar
             chosenDate={newDate =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationEndDate = newDate
               })
             }
           />
           <TimeSelector
-            hour={roomDates.nextMatchRegistrationEndTime.hour}
-            minute={roomDates.nextMatchRegistrationEndTime.minute}
+            hour={roomEditDates.nextMatchRegistrationEndTime.hour}
+            minute={roomEditDates.nextMatchRegistrationEndTime.minute}
             onChangeHour={newHour =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationEndTime.hour = newHour.target.value
               })
             }
             onChangeMinute={newMinute =>
-              setRoomDates(draft => {
+              setRoomEditDates(draft => {
                 draft.nextMatchRegistrationEndTime.minute = newMinute.target.value
               })
             }

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React from "react"
 import FormationSection from "./FormationSection"
 import PlayerSection from "./PlayerSection"
 import SkillSection from "./SkillSection"

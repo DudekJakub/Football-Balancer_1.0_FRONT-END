@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import StateContext from "../../StateContext"
+import { RoomContext } from "../RoomContext"
 import Axios from "axios"
 import { useImmer } from "use-immer"
 import { CSSTransition } from "react-transition-group"
@@ -12,9 +13,8 @@ import PlayerEdit from "./playerSectionChildren/PlayerEdit"
 import Loading from "../Loading"
 
 function PlayerSection(props) {
-  const roomId = props.room.id
-  const isUserAdmin = props.room.isUserAdmin
   const appState = useContext(StateContext)
+  const { room, roomMetaInfo } = useContext(RoomContext)
   const [renderContent, setRenderContent] = useState(true)
   const [players, setPlayers] = useImmer({
     playersArray: []
@@ -34,7 +34,7 @@ function PlayerSection(props) {
   useEffect(() => {
     async function fetchPlayersList() {
       try {
-        const response = await Axios.get(`/api/player/all-by-room-id?roomId=${roomId}`, { headers: { Authorization: `Bearer ${appState.user.token}` } })
+        const response = await Axios.get(`/api/player/all-by-room-id?roomId=${room.id}`, { headers: { Authorization: `Bearer ${appState.user.token}` } })
         if (response.data) {
           setPlayers(draft => {
             draft.playersArray = response.data
@@ -97,8 +97,6 @@ function PlayerSection(props) {
         {state.renderBasicInfo && <a>Player section is an area where you can check list of all players belong to the room, inspect each of them, edit or create new one!</a>}
         {state.renderCreatePlayerBasicStep && (
           <CreatePlayerBasicStep
-            room={props.room}
-            setRoom={props.setRoom}
             resetRender={resetRender}
             submitBasicStep={newPlayer => {
               setState(draft => {
@@ -147,7 +145,7 @@ function PlayerSection(props) {
 
   function renderCloser() {
     setState(draft => {
-      ;(draft.renderBasicInfo = false), (draft.renderCreatePlayerBasicStep = false), (draft.renderPlayerInfo = false), (draft.renderPlayerEdit = false)
+      ;(draft.renderBasicInfo = false), (draft.renderCreatePlayerBasicStep = false), (draft.renderCreatePlayerSkillPointsStep = false), (draft.renderPlayerInfo = false), (draft.renderPlayerEdit = false)
     })
   }
 
@@ -172,7 +170,7 @@ function PlayerSection(props) {
           <div className="main-content-area">
             {state.renderBasicInfo && (
               <div>
-                {isUserAdmin && (
+                {roomMetaInfo.isUserAdmin && (
                   <button
                     type="button"
                     onClick={() => {
