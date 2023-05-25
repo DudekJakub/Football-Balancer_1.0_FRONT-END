@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react"
+import React, { useEffect, useContext } from "react"
 import Axios from "axios"
 import moment from "moment/moment"
 import { useImmer } from "use-immer"
@@ -12,22 +12,21 @@ import DispatchContext from "../DispatchContext"
 function EditRoomDates(props) {
   const appState = useContext(StateContext)
   const appDispatch = useContext(DispatchContext)
-  const roomId = useState(props.roomId)
   const [roomDates, setRoomDates] = useImmer({
-    nextMatchDate: props.dates.nextMatchDate,
+    nextMatchDate: "",
     nextMatchTime: {
-      hour: props.dates.nextMatchTime.hour,
-      minute: props.dates.nextMatchTime.minute
+      hour: "00",
+      minute: "00"
     },
-    nextMatchRegistrationOpenDate: props.dates.nextMatchRegistrationOpenDate,
+    nextMatchRegistrationOpenDate: "",
     nextMatchRegistrationOpenTime: {
-      hour: props.dates.nextMatchRegistrationOpenTime.hour,
-      minute: props.dates.nextMatchRegistrationOpenTime.minute
+      hour: "00",
+      minute: "00"
     },
-    nextMatchRegistrationEndDate: props.dates.nextMatchRegistrationEndDate,
+    nextMatchRegistrationEndDate: "",
     nextMatchRegistrationEndTime: {
-      hour: props.dates.nextMatchRegistrationEndTime.hour,
-      minute: props.dates.nextMatchRegistrationEndTime.minute
+      hour: "00",
+      minute: "00"
     },
     nextMatchDateFormated: "",
     nextMatchRegistrationOpenDateFormated: "",
@@ -115,11 +114,12 @@ function EditRoomDates(props) {
       async function submitDatesChange() {
         try {
           await Axios.patch(
-            `/api/room/basic-management/next-match-all-dates/${props.roomId}?adminId=${appState.user.id}`,
+            `/api/room/basic-management/next-match-all-dates/${props.roomId}`,
             {
               nextMatchDate: roomDates.nextMatchDateFormated,
               nextMatchRegistrationStartDate: roomDates.nextMatchRegistrationOpenDateFormated,
-              nextMatchRegistrationEndDate: roomDates.nextMatchRegistrationEndDateFormated
+              nextMatchRegistrationEndDate: roomDates.nextMatchRegistrationEndDateFormated,
+              roomAdminId: appState.user.id
             },
             { headers: { Authorization: `Bearer ${appState.user.token}` } },
             { cancelToken: ourRequest.token }
@@ -193,92 +193,86 @@ function EditRoomDates(props) {
     <div style={{ display: "table-caption" }}>
       {renderStageTitle("next match date", state.setNextMatchDateStage)}
       <CSSTransition in={state.setNextMatchDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <Calendar
-          chosenDate={newDate =>
-            setRoomDates(draft => {
-              draft.nextMatchDate = newDate
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setNextMatchDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <TimeSelector
-          hour={roomDates.nextMatchTime.hour}
-          minute={roomDates.nextMatchTime.minute}
-          onChangeHour={newHour =>
-            setRoomDates(draft => {
-              draft.nextMatchTime.hour = newHour.target.value
-            })
-          }
-          onChangeMinute={newMinute =>
-            setRoomDates(draft => {
-              draft.nextMatchTime.minute = newMinute.target.value
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setNextMatchDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <SubmitOrCancelButton handleSubmit={goToRegistrationOpenDateStage} handleCancel={unrenderComponent} errorCondition={error.withNextMatchDate} errorMessage={error.nextMatchDateMessage} />
+        <a>
+          <Calendar
+            chosenDate={newDate =>
+              setRoomDates(draft => {
+                draft.nextMatchDate = newDate
+              })
+            }
+          />
+          <TimeSelector
+            hour={roomDates.nextMatchTime.hour}
+            minute={roomDates.nextMatchTime.minute}
+            onChangeHour={newHour =>
+              setRoomDates(draft => {
+                draft.nextMatchTime.hour = newHour.target.value
+              })
+            }
+            onChangeMinute={newMinute =>
+              setRoomDates(draft => {
+                draft.nextMatchTime.minute = newMinute.target.value
+              })
+            }
+          />
+          <SubmitOrCancelButton handleSubmit={goToRegistrationOpenDateStage} handleCancel={unrenderComponent} errorCondition={error.withNextMatchDate} errorMessage={error.nextMatchDateMessage} />
+        </a>
       </CSSTransition>
 
       {renderStageTitle("registration open date", state.setRegistrationOpenDateStage)}
       <CSSTransition in={state.setRegistrationOpenDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <Calendar
-          chosenDate={newDate =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationOpenDate = newDate
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setRegistrationOpenDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <TimeSelector
-          hour={roomDates.nextMatchRegistrationOpenTime.hour}
-          minute={roomDates.nextMatchRegistrationOpenTime.minute}
-          onChangeHour={newHour =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationOpenTime.hour = newHour.target.value
-            })
-          }
-          onChangeMinute={newMinute =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationOpenTime.minute = newMinute.target.value
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setRegistrationOpenDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <SubmitOrCancelButton handleSubmit={goToRegistrationEndDateStage} handleCancel={unrenderComponent} errorCondition={error.withRegistrationOpenDate} errorMessage={error.registrationOpenDateMessage} />
+        <a>
+          <Calendar
+            chosenDate={newDate =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationOpenDate = newDate
+              })
+            }
+          />
+          <TimeSelector
+            hour={roomDates.nextMatchRegistrationOpenTime.hour}
+            minute={roomDates.nextMatchRegistrationOpenTime.minute}
+            onChangeHour={newHour =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationOpenTime.hour = newHour.target.value
+              })
+            }
+            onChangeMinute={newMinute =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationOpenTime.minute = newMinute.target.value
+              })
+            }
+          />
+          <SubmitOrCancelButton handleSubmit={goToRegistrationEndDateStage} handleCancel={unrenderComponent} errorCondition={error.withRegistrationOpenDate} errorMessage={error.registrationOpenDateMessage} />
+        </a>
       </CSSTransition>
 
       {renderStageTitle("registration end date", state.setRegistrationEndDateStage)}
       <CSSTransition in={state.setRegistrationEndDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <Calendar
-          chosenDate={newDate =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationEndDate = newDate
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setRegistrationEndDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <TimeSelector
-          hour={roomDates.nextMatchRegistrationEndTime.hour}
-          minute={roomDates.nextMatchRegistrationEndTime.minute}
-          onChangeHour={newHour =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationEndTime.hour = newHour.target.value
-            })
-          }
-          onChangeMinute={newMinute =>
-            setRoomDates(draft => {
-              draft.nextMatchRegistrationEndTime.minute = newMinute.target.value
-            })
-          }
-        />
-      </CSSTransition>
-      <CSSTransition in={state.setRegistrationEndDateStage} timeout={1000} classNames="add-calendar" unmountOnExit>
-        <SubmitOrCancelButton handleSubmit={finalizeStages} handleCancel={unrenderComponent} errorCondition={error.withRegistrationEndDate} errorMessage={error.registrationEndDateMessage} />
+        <a>
+          <Calendar
+            chosenDate={newDate =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationEndDate = newDate
+              })
+            }
+          />
+          <TimeSelector
+            hour={roomDates.nextMatchRegistrationEndTime.hour}
+            minute={roomDates.nextMatchRegistrationEndTime.minute}
+            onChangeHour={newHour =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationEndTime.hour = newHour.target.value
+              })
+            }
+            onChangeMinute={newMinute =>
+              setRoomDates(draft => {
+                draft.nextMatchRegistrationEndTime.minute = newMinute.target.value
+              })
+            }
+          />
+          <SubmitOrCancelButton handleSubmit={finalizeStages} handleCancel={unrenderComponent} errorCondition={error.withRegistrationEndDate} errorMessage={error.registrationEndDateMessage} />
+        </a>
       </CSSTransition>
     </div>
   )
