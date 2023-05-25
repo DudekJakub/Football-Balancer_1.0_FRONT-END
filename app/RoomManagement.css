@@ -1,0 +1,152 @@
+.room-management-layout {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background-color: #4c9141;
+  border: 1px solid #2f3061;
+  border-radius: 15px;
+}
+
+.room-management-layout > div {
+  padding: 10px;
+  border-bottom: 1px solid black;
+}
+
+.room-management-layout > div > h2 {
+  margin: 0;
+  text-align: center;
+  font-variant: all-small-caps;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.room-management-layout > div > h2 > span {
+  font-family: "Material Symbols Outlined";
+  font-variant: normal;
+}
+
+.room-management-layout > div:last-child {
+  border-bottom: none;
+}
+
+.room-management-player-section {
+  height: 540px;
+  display: flex;
+  padding: 10px;
+  font-variant: all-small-caps;
+}
+
+.room-management-player-section > div.player-list-area {
+  width: 40%;
+  text-align: center;
+  border-right: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list-item {
+  margin-top: 10px;
+  padding-left: 5px;
+  width: 90%;
+  display: inline-block;
+  overflow-y: auto;
+  background-color: rgb(236, 236, 236);
+  border: 1px solid #2f3061;
+  border-radius: 15px;
+  color: black;
+}
+
+.room-management-player-section > div.main-content-area {
+  width: 60%;
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.room-management-player-section > div.main-content-area > div.create-new-player {
+  padding: 10px;
+}
+
+.room-management-layout button {
+  font-variant: all-small-caps;
+  background-color: rgb(47, 48, 97);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  color: wheat;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.room-management-layout button.delete {
+  font-variant: all-small-caps;
+  font-size: 14px;
+  background-color: rgb(134, 18, 18);
+  margin: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  color: wheat;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.room-management-player-section > div.main-content-area > div.basic-content {
+  width: -webkit-fill-available;
+  padding: 10px;
+  text-align: center;
+}
+
+.create-player-input-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.create-player-input-row label {
+  margin-right: 1rem;
+}
+
+.create-player-input-row input {
+  flex: 1;
+  text-align: center;
+}
+
+.player-info-box {
+  color: wheat;
+  background: darkgreen;
+  border: 1px solid;
+  padding: 10px;
+  display: grid;
+}
+
+.player-link-box {
+  color: wheat;
+  background: darkgreen;
+  border: 1px solid;
+  padding: 10px;
+}
+
+.custom-info-box {
+  color: rgb(221 203 169);
+  background: rgb(6, 71, 6);
+  border: 1px solid;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+
+.delete :single-button {
+  font-variant: all-small-caps;
+  background-color: rgb(230, 7, 18);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  color: wheat;
+  border: 2px solid black;
+  border-radius: 10px;
+}
